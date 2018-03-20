@@ -26,3 +26,36 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_SET_TREE_H_
+#define _XTNT_SET_TREE_H_
+
+#ifndef _XTNT_SET_COMMON_H_
+#include <extant/set/common.h>
+#endif /* _XTNT_SET_COMMON_H_ */
+
+#ifndef XTNT_TREE_MAX_HEIGHT
+#define XTNT_TREE_MAX_HEIGHT 18
+#endif /* ifndef XTNT_TREE_MAX_HEIGHT */
+
+#define XTNT_TREE_RED 1
+#define XTNT_TREE_BLACK 2
+
+#define XTNT_TREE_UNINITIALIZED 0
+#define XTNT_TREE_INITIALIZED 1
+#define XTNT_TREE_NOROOT 1
+#define XTNT_TREE_ROOT 3
+
+struct xtnt_node* xtnt_tree_insert(
+        struct xtnt_node_set* tree,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_tree_replace(
+        struct xtnt_node_set* tree,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_tree_search(
+        struct xtnt_node_set* tree,
+        xtnt_uint_t key);
+
+#endif /* ifndef _XTNT_SET_TREE_H_ */

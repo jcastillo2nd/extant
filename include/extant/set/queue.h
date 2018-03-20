@@ -26,3 +26,22 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_SET_QUEUE_H_
+#define _XTNT_SET_QUEUE_H_
+
+#ifndef _XTNT_SET_COMMON_H_
+#include <extant/set/common.h>
+#endif /* _XTNT_SET_COMMON_H_ */
+
+struct xtnt_node* xtnt_queue_push(
+        struct xtnt_node_set* queue,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_queue_pop(
+        struct xtnt_node_set* queue);
+
+struct xtnt_node* xtnt_queue_peek(
+        struct xtnt_node_set* queue);
+
+#endif /* ifndef _XTNT_SET_QUEUE_H_ */

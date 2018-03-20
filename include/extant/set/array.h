@@ -26,3 +26,29 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_SET_ARRAY_H_
+#define _XTNT_SET_ARRAY_H_
+
+#ifndef _XTNT_SET_COMMON_H_
+#include <extant/set/common.h>
+#endif /* _XTNT_SET_COMMON_H_ */
+
+struct xtnt_node* xtnt_array_add(
+        struct xtnt_node_set* array,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_array_delete(
+        struct xtnt_node_set* array,
+        xtnt_uint_t index);
+
+struct xtnt_node* xtnt_array_get(
+        struct xtnt_node_set* array,
+        xtnt_uint_t index);
+
+struct xtnt_node* xtnt_array_set(
+        struct xtnt_node_set* array,
+        struct xtnt_node* node,
+        xtnt_uint_t index);
+
+#endif /* ifndef _XTNT_SET_ARRAY_H_ */

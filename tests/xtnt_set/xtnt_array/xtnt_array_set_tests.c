@@ -26,3 +26,52 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+
+int cgre_array_set_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_array_set_tests()
+    );
+}
+
+int cgre_array_set_tests()
+{
+    struct cgre_node_set array;
+    cgre_node_set_initialize(&array);
+    struct cgre_node_set empty;
+    cgre_node_set_initialize(&empty);
+    struct cgre_node item1;
+    cgre_node_initialize(&item1, 0, NULL);
+    cgre_array_add(&array, &item1);
+    struct cgre_node item2;
+    cgre_node_initialize(&item2, 0, NULL);
+    struct cgre_node empty1;
+    cgre_node_initialize(&empty1, 0, NULL);
+    // Check if set list index 0 returns item1
+    if (cgre_array_set(&array, &item2, 0) != &item1) {
+        return 1;
+    }
+    // Check list head, middle and tail updated to item2
+    if (array.link[CGRE_NODE_HEAD] != &item2) {
+        return 2;
+    }
+    if (array.link[CGRE_NODE_MIDDLE] != &item2) {
+        return 4;
+    }
+    if (array.link[CGRE_NODE_TAIL] != &item2) {
+        return 8;
+    }
+    // Check out of bounds set returns NULL
+    if (cgre_array_set(&array, &item1, 4) != NULL) {
+        return 16;
+    }
+    // Check if empty list set is NULL
+    if (cgre_array_set(&empty, &empty1, 0) != NULL) {
+        return 32;
+    }
+    return 0;
+}

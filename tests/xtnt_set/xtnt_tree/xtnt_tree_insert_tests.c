@@ -26,3 +26,38 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+#include <stdio.h>
+
+int cgre_tree_insert_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_tree_insert_tests()
+   );
+}
+
+int cgre_tree_insert_tests()
+{
+    struct cgre_node_set tree1;
+    struct cgre_node root1;
+    struct cgre_node new1;
+    cgre_node_initialize(&root1, 44, NULL);
+    cgre_node_initialize(&new1, 99, NULL);
+    cgre_node_set_initialize(&tree1);
+    if (cgre_tree_insert(&tree1, &root1) != &root1) {
+        return 1;
+    }
+    if (tree1.count != 1) {
+        return 2;
+    }
+    if (cgre_tree_insert(&tree1, &new1) != &new1) {
+        return 4;
+    }
+    if (tree1.count != 2) {
+        return 8;
+    }
+    return 0;
+}

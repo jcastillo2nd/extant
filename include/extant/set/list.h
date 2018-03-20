@@ -26,3 +26,32 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_SET_LIST_H_
+#define _XTNT_SET_LIST_H_
+
+#ifndef _XTNT_SET_COMMON_H_
+#include <extant/set/common.h>
+#endif /* _XTNT_SET_COMMON_H_ */
+
+#ifndef XTNT_LIST_MODE_DEFAULT
+#define XTNT_LIST_MODE_DEFAULT 1
+#endif /* ifndef XTNT_LIST_MODE_DEFAULT */
+
+struct xtnt_node* xtnt_list_delete(
+        struct xtnt_node_set* list,
+        xtnt_uint_t key);
+
+struct xtnt_node* xtnt_list_insert(
+        struct xtnt_node_set* list,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_list_replace(
+        struct xtnt_node_set* list,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_list_search(
+        struct xtnt_node_set* list,
+        xtnt_uint_t key);
+
+#endif /* ifndef _XTNT_SET_LIST_H_ */

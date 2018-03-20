@@ -26,3 +26,39 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+
+int cgre_stack_push_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_stack_push_tests()
+    );
+}
+
+int cgre_stack_push_tests()
+{
+    struct cgre_node_set stack;
+    cgre_node_set_initialize(&stack);
+    struct cgre_node item1;
+    cgre_node_initialize(&item1, 1, NULL);
+    struct cgre_node item2;
+    cgre_node_initialize(&item2, 2, NULL);
+    struct cgre_node item3;
+    cgre_node_initialize(&item3, 3, NULL);
+    if (cgre_stack_push(&stack, &item1) != &item1 ||
+            stack.count != 1) {
+        return 1;
+    }
+    if (cgre_stack_push(&stack, &item2) != &item2 ||
+            stack.count != 2) {
+        return 2;
+    }
+    if (cgre_stack_push(&stack, &item3) != &item3 ||
+            stack.count != 3) {
+        return 4;
+    }
+    return 0;
+}

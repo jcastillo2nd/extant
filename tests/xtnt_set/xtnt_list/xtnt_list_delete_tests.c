@@ -26,3 +26,46 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+
+int cgre_hash_list_delete_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_hash_list_delete_tests()
+    );
+}
+
+int cgre_hash_list_delete_tests()
+{
+    struct cgre_node_set list;
+    cgre_node_set_initialize(&list);
+    struct cgre_node item1;
+    cgre_node_initialize(&item1, 1, NULL);
+    struct cgre_node item2;
+    cgre_node_initialize(&item2, 2, NULL);
+    struct cgre_node item3;
+    cgre_node_initialize(&item3, 3, NULL);
+    list.link[CGRE_NODE_HEAD] = &item1;
+    list.link[CGRE_NODE_MIDDLE] = &item2;
+    list.link[CGRE_NODE_TAIL] = &item3;
+    item1.link[CGRE_NODE_TAIL] = &item2;
+    item2.link[CGRE_NODE_HEAD] = &item1;
+    item2.link[CGRE_NODE_TAIL] = &item3;
+    item3.link[CGRE_NODE_HEAD] = &item2;
+    if (cgre_hash_list_delete(&list, 2) != &item2) {
+       return 1;
+    }
+    if (item1.link[CGRE_NODE_TAIL] != &item3) {
+        return 2;
+    }
+    if (item3.link[CGRE_NODE_HEAD] != &item1) {
+        return 4;
+    }
+    if (cgre_hash_list_delete(&list, 7) != NULL) {
+        return 8;
+    }
+    return 0;
+}

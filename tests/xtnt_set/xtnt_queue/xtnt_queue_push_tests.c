@@ -26,3 +26,39 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+
+int cgre_queue_push_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_queue_push_tests()
+    );
+}
+
+int cgre_queue_push_tests()
+{
+    struct cgre_node_set queue;
+    cgre_node_set_initialize(&queue);
+    struct cgre_node item1;
+    cgre_node_initialize(&item1, 1, NULL);
+    struct cgre_node item2;
+    cgre_node_initialize(&item2, 2, NULL);
+    struct cgre_node item3;
+    cgre_node_initialize(&item3, 3, NULL);
+    if (cgre_queue_push(&queue, &item1) != &item1 ||
+            queue.count != 1) {
+        return 1;
+    }
+    if (cgre_queue_push(&queue, &item2) != &item2 ||
+            queue.count != 2) {
+        return 2;
+    }
+    if (cgre_queue_push(&queue, &item3) != &item3 ||
+            queue.count != 3) {
+        return 4;
+    }
+    return 0;
+}

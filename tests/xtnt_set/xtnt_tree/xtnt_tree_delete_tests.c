@@ -26,3 +26,36 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+#include <stdio.h>
+
+int cgre_tree_delete_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_tree_delete_tests()
+   );
+}
+
+int cgre_tree_delete_tests()
+{
+    struct cgre_node_set tree1;
+    struct cgre_node root1;
+    cgre_node_set_initialize(&tree1);
+    struct cgre_node_set tree2;
+    cgre_node_set_initialize(&tree2);
+    cgre_node_initialize(&root1, 44, NULL);
+    tree1.count = 1;
+    tree1.link[CGRE_NODE_HEAD] = &root1;
+    // Non-existing node delete returns NULL
+    if (cgre_tree_delete(&tree1, 99) != NULL) {
+        return 1;
+    }
+    // Existing node delete returns node
+    if (cgre_tree_delete(&tree1, 44) != &root1) {
+        return 2;
+    }
+    return 0;
+}

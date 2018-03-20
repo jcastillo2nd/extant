@@ -26,3 +26,36 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <cgre/cgre.h>
+
+int cgre_hash_list_search_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+        cgre_hash_list_search_tests()
+    );
+}
+
+int cgre_hash_list_search_tests()
+{
+    struct cgre_node_set list;
+    cgre_node_set_initialize(&list);
+    struct cgre_node item1;
+    cgre_node_initialize(&item1, 1, NULL);
+    struct cgre_node item2;
+    cgre_node_initialize(&item2, 2, NULL);
+    struct cgre_node item3;
+    cgre_node_initialize(&item3, 3, NULL);
+    cgre_hash_list_insert(&list, &item1);
+    cgre_hash_list_insert(&list, &item2);
+    cgre_hash_list_insert(&list, &item3);
+    if (cgre_hash_list_search(&list, 2) != &item2) {
+        return 1;
+    }
+    if (cgre_hash_list_search(&list, 5) != NULL) {
+        return 2;
+    }
+    return 0;
+}

@@ -26,3 +26,49 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <extant/extant.h>
+#include <stdio.h>
+
+int xtnt_node_initialize_tests();
+
+int main(int argc, char** argv)
+{
+    return (
+            xtnt_node_initialize_tests()
+   );
+}
+
+int xtnt_node_initialize_tests()
+{
+    int i;
+    struct xtnt_node node1;
+    struct xtnt_node node2;
+    xtnt_node_initialize(&node1, 80, NULL);
+    xtnt_node_initialize(&node2, 44, &i);
+    // Check Node key is properly set
+    if (node1.key != 80) {
+        return 1;
+    }
+    // Check node NULL value is NULL
+    if (node1.value != NULL) {
+        return 2;
+    }
+    // Check node value is properly set
+    if (node2.value != &1) {
+	return 3;
+    }
+    // Check node1 links are NULL
+    if (node1.link[0] != NULL || \
+        node1.link[1] != NULL || \
+	node1.link[2] != NULL) {
+	return 4;
+    }
+    // Check node2 links are NULL
+    if (node1.link[0] != NULL || \
+        node1.link[1] != NULL || \
+	node1.link[2] != NULL) {
+	return 4;
+    }
+    return 0;
+}

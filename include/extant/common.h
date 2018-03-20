@@ -26,3 +26,48 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_COMMON_H_
+#define _XTNT_COMMON_H_
+
+
+#if HAVE_LONG_LONG_INT == 1
+
+#define XTNT_INT_MAX LLONG_MAX
+#define XTNT_UINT_MAX ULLONG_MAX
+typedef long long int xtnt_int_t;
+typedef unsigned long long int xtnt_uint_t;
+
+#elif HAVE_LONG_INT == 1
+
+#define XTNT_INT_MAX LONG_MAX
+#define XTNT_UINT_MAX ULONG_MAX
+typedef long int xtnt_int_t;
+typedef unsigned long int xtnt_uint_t;
+
+#else
+
+#define XTNT_INT_MAX INT_MAX
+#define XTNT_UINT_MAX UINT_MAX
+typedef int xtnt_int_t;
+typedef unsigned int xtnt_uint_t;
+
+#endif /* ifdef HAVE_LONG_LONG_INT */
+
+#if HAVE_LONG_DOUBLE == 1
+
+typedef long double xtnt_real_t;
+
+#elif HAVE_DOUBLE == 1
+
+typedef double xtnt_real_t;
+
+#else
+
+typedef float xtnt_real_t;
+
+#endif /* HAVE_LONG_DOUBLE == 1 */
+
+xtnt_uint_t xtnt_hash(void* key);
+
+#endif /* ifndef _XTNT_COMMON_H_

@@ -26,3 +26,22 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#ifndef _XTNT_SET_STACK_H_
+#define _XTNT_SET_STACK_H_
+
+#ifndef _XTNT_SET_COMMON_H_
+#include <extant/set/common.h>
+#endif /* _XTNT_SET_COMMON_H_ */
+
+struct xtnt_node* xtnt_stack_push(
+        struct xtnt_node_set* stack,
+        struct xtnt_node* node);
+
+struct xtnt_node* xtnt_stack_pop(
+        struct xtnt_node_set* stack);
+
+struct xtnt_node* xtnt_stack_peek(
+        struct xtnt_node_set* stack);
+
+#endif /* ifndef _XTNT_SET_STACK_H_ */
