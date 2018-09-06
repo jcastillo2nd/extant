@@ -30,7 +30,9 @@ SOFTWARE.
 #ifndef _XTNT_SET_COMMON_H_
 #define _XTNT_SET_COMMON_H_
 
-#include <pthread.h>
+#ifndef _XTNT_COMMON_H_
+#include <extant/common.h>
+#endif
 
 #define XTNT_NODE(N) (N->value)
 #define XTNT_NODE_KEY_CMP(X, Y) ((X<Y)?-1:(X>Y))
@@ -45,12 +47,16 @@ SOFTWARE.
 #define XTNT_NODES_LOCK_SET_FAIL(N) N = XTNT_NODES_LOCK_SET(N, XTNT_NODES_LOCK_FAIL)
 
 #define XTNT_NODE_HEAD 0
+#define XTNT_NODE_LEFT 0
 #define XTNT_NODE_MIDDLE 1
+#define XTNT_NODE_CENTER 1
+#define XTNT_NODE_PARENT 1
 #define XTNT_NODE_TAIL 2
+#define XTNT_NODE_RIGHT 2
 
 struct xtnt_node {
-    void* value;
-    struct xtnt_node* link[3];
+    void *value;
+    struct xtnt_node *link[3];
     xtnt_uint_t key;
     xtnt_uint_t mode;
     xtnt_uint_t state;
@@ -59,24 +65,24 @@ struct xtnt_node {
 };
 
 struct xtnt_node_set {
-    struct xtnt_node* link[3];
+    struct xtnt_node *link[3];
     xtnt_uint_t count;
     xtnt_uint_t state;
     pthread_mutex_t lock;
 };
 
-struct xtnt_node* xtnt_node_initialize(
-        struct xtnt_node* node,
+struct xtnt_node *xtnt_node_initialize(
+        struct xtnt_node *node,
         xtnt_uint_t key,
-        void* value);
+        void *value);
 
-struct xtnt_node_set* xtnt_node_set_initialize(
-        struct xtnt_node_set* set);
+struct xtnt_node_set *xtnt_node_set_initialize(
+        struct xtnt_node_set *set);
 
-void* xtnt_node_uninitialize(
-        struct xtnt_node* node);
+void *xtnt_node_uninitialize(
+        struct xtnt_node *node);
 
-struct xtnt_node_set* xtnt_node_set_uninitialize(
-        struct xtnt_node_set* set);
+struct xtnt_node_set *xtnt_node_set_uninitialize(
+        struct xtnt_node_set *set);
 
-#endif /* ifndef _XTNT_SET_COMMON_H_
+#endif /* ifndef _XTNT_SET_COMMON_H_ */

@@ -27,48 +27,27 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <extant/extant.h>
-#include <stdio.h>
+#ifndef _XTNT_SET_H_
+#define _XTNT_SET_H_
 
-int xtnt_node_initialize_tests();
+#ifndef _XTNT_SET_ARRAY_H_
+#include <extant/set/array.h>
+#endif /* _XTNT_SET_ARRAY_H_ */
 
-int main(int argc, char** argv)
-{
-    return (
-            xtnt_node_initialize_tests()
-   );
-}
+#ifndef _XTNT_SET_LIST_H_
+#include <extant/set/list.h>
+#endif /* _XTNT_SET_LIST_H_ */
 
-int xtnt_node_initialize_tests()
-{
-    int i;
-    struct xtnt_node node1;
-    struct xtnt_node node2;
-    xtnt_node_initialize(&node1, 80, NULL);
-    xtnt_node_initialize(&node2, 44, &i);
-    // Check Node key is properly set
-    if (node1.key != 80) {
-        return 1;
-    }
-    // Check node NULL value is NULL
-    if (node1.value != NULL) {
-        return 2;
-    }
-    // Check node value is properly set
-    if (node2.value != &1) {
-	return 3;
-    }
-    // Check node1 links are NULL
-    if (node1.link[0] != NULL || \
-        node1.link[1] != NULL || \
-	node1.link[2] != NULL) {
-	return 4;
-    }
-    // Check node2 links are NULL
-    if (node1.link[0] != NULL || \
-        node1.link[1] != NULL || \
-	node1.link[2] != NULL) {
-	return 4;
-    }
-    return 0;
-}
+#ifndef _XTNT_SET_QUEUE_H_
+#include <extant/set/queue.h>
+#endif /* _XTNT_SET_QUEUE_H_ */
+
+#ifndef _XTNT_SET_STACK_H_
+#include <extant/set/stack.h>
+#endif /* _XTNT_SET_STACK_H_ */
+
+#ifndef _XTNT_SET_TREE_H_
+#include <extant/set/tree.h>
+#endif /* _XTNT_SET_TREE_H_ */
+
+#endif /* _XTNT_SET_H_ */

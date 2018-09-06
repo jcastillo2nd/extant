@@ -30,6 +30,10 @@ SOFTWARE.
 #ifndef _XTNT_COMMON_H_
 #define _XTNT_COMMON_H_
 
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <pthread.h>
 
 #if HAVE_LONG_LONG_INT == 1
 
@@ -68,6 +72,6 @@ typedef float xtnt_real_t;
 
 #endif /* HAVE_LONG_DOUBLE == 1 */
 
-xtnt_uint_t xtnt_hash(void* key);
+xtnt_uint_t xtnt_hash(void *key);
 
-#endif /* ifndef _XTNT_COMMON_H_
+#endif /* ifndef _XTNT_COMMON_H */

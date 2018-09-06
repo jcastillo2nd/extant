@@ -27,22 +27,19 @@ SOFTWARE.
 ===============================================================================
 */
 
-#ifndef _XTNT_SET_ARRAY_H_
-#include <extant/set/array.h>
-#endif /* _XTNT_SET_ARRAY_H_ */
+#ifndef _XTNT_H_
+#define _XTNT_H_
 
-#ifndef _XTNT_SET_LIST_H_
-#include <extant/set/list.h>
-#endif /* _XTNT_SET_LIST_H_ */
+#ifndef _XTNT_COMMON_H_
+#include <extant/common.h>
+#endif /* _XTNT_COMMON_H_ */
 
-#ifndef _XTNT_SET_QUEUE_H_
-#include <extant/set/queue.h>
-#endif /* _XTNT_SET_QUEUE_H_ */
+#ifndef _XTNT_LOG_H_
+#include <extant/log.h>
+#endif /* _XTNT_LOG_H_ */
 
-#ifndef _XTNT_SET_STACK_H_
-#include <extant/set/stack.h>
-#endif /* _XTNT_SET_STACK_H_ */
+#ifndef _XTNT_SET_H_
+#include <extant/set.h>
+#endif /* _XTNT_SET_H_ */
 
-#ifndef _XTNT_SET_TREE_H_
-#include <extant/set/tree.h>
-#endif /* _XTNT_SET_TREE_H_ */
+#endif /* _XTNT_H_ */

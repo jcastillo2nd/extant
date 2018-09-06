@@ -27,43 +27,31 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <cgre/cgre.h>
+#ifndef _XTNT_DSO_H_
+#define _XTNT_DSO_H_
 
-int cgre_hash_list_replace_tests();
-
-int main(int argc, char** argv)
+struct xtnt_dso
 {
-    return (
-        cgre_hash_list_replace_tests()
-    );
-}
+    const char *name;
+    void *handle;
+};
 
-int cgre_hash_list_replace_tests()
+struct xtnt_dso_symbol
 {
-    struct cgre_node_set list;
-    cgre_node_set_initialize(&list);
-    struct cgre_node item1;
-    cgre_node_initialize(&item1, 1, NULL);
-    struct cgre_node item2;
-    cgre_node_initialize(&item2, 2, NULL);
-    struct cgre_node item3;
-    cgre_node_initialize(&item3, 3, NULL);
-    struct cgre_node item4;
-    cgre_node_initialize(&item4, 2, NULL);
-    cgre_hash_list_insert(&list, &item1);
-    cgre_hash_list_insert(&list, &item2);
-    cgre_hash_list_insert(&list, &item3);
-    if (cgre_hash_list_replace(&list, &item4) != &item2) {
-        return 1;
-    }
-    if (item2.link[CGRE_NODE_HEAD] != item4.link[CGRE_NODE_HEAD]) {
-        return 2;
-    }
-    if (item2.link[CGRE_NODE_TAIL] != item4.link[CGRE_NODE_TAIL]) {
-        return 4;
-    }
-    if (list.link[CGRE_NODE_MIDDLE] != &item4) {
-        return 8;
-    }
-    return 0;
-}
+    const char *name;
+    void *ptr;
+};
+
+struct xtnt_dso *xtnt_dso_load(
+    struct xtnt_dso *handle,
+    const char *name);
+
+void xtnt_dso_unload(
+    struct xtnt_dso *handle);
+
+struct xtnt_dso_symbol *xtnt_dso_symbol(
+    struct xtnt_dso *handle,
+    struct xtnt_dso_symbol *symbol,
+    const char *name);
+
+#endif /* _XTNT_DSO_H_ */

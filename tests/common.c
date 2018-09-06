@@ -27,51 +27,46 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <cgre/cgre.h>
+#include <check.h>
+#include <extant/common.h>
 
-int cgre_array_set_tests();
+#include <stdio.h>
 
-int main(int argc, char** argv)
+START_TEST (test_xtnt_hash)
 {
-    return (
-        cgre_array_set_tests()
-    );
+  char name[] = "This is a string";
+//  ck_assert_int_eq(xtnt_hash(&name), 634);
+  ck_assert_msg(xtnt_hash(name) == (xtnt_uint_t) 3817775,
+		"expecting 3817775 but got %u instead", xtnt_hash(&name));
+}
+END_TEST
+
+Suite * xtnt_common_suite(void)
+{
+    Suite *s;
+    TCase *tc_common;
+
+    s = suite_create("xtnt_common");
+
+    tc_common = tcase_create("Common");
+
+    tcase_add_test(tc_common, test_xtnt_hash);
+    suite_add_tcase(s, tc_common);
+
+    return s;
 }
 
-int cgre_array_set_tests()
+int main(void)
 {
-    struct cgre_node_set array;
-    cgre_node_set_initialize(&array);
-    struct cgre_node_set empty;
-    cgre_node_set_initialize(&empty);
-    struct cgre_node item1;
-    cgre_node_initialize(&item1, 0, NULL);
-    cgre_array_add(&array, &item1);
-    struct cgre_node item2;
-    cgre_node_initialize(&item2, 0, NULL);
-    struct cgre_node empty1;
-    cgre_node_initialize(&empty1, 0, NULL);
-    // Check if set list index 0 returns item1
-    if (cgre_array_set(&array, &item2, 0) != &item1) {
-        return 1;
-    }
-    // Check list head, middle and tail updated to item2
-    if (array.link[CGRE_NODE_HEAD] != &item2) {
-        return 2;
-    }
-    if (array.link[CGRE_NODE_MIDDLE] != &item2) {
-        return 4;
-    }
-    if (array.link[CGRE_NODE_TAIL] != &item2) {
-        return 8;
-    }
-    // Check out of bounds set returns NULL
-    if (cgre_array_set(&array, &item1, 4) != NULL) {
-        return 16;
-    }
-    // Check if empty list set is NULL
-    if (cgre_array_set(&empty, &empty1, 0) != NULL) {
-        return 32;
-    }
-    return 0;
+    int failed;
+    Suite *s;
+    SRunner *sr;
+
+    s = xtnt_common_suite();
+    sr = srunner_create(s);
+
+    srunner_run_all(sr, CK_VERBOSE);
+    failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return (failed == 0) ? 0 : failed;
 }

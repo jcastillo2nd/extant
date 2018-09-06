@@ -1,0 +1,5 @@
+ACLOCAL_AMFLAGS = -I config
+
+SUBDIRS = src @BUILD_SUBDIRS@
+
+EXTRA_DIST = include @EXTRAS@
