@@ -32,6 +32,36 @@ AS_IF([test "x${HAS_DOXYGEN}" = "xyes"],[BUILD_DOC="doc"],[AC_MSG_WARN([Doxygen 
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
                [AC_MSG_FAILURE([Threads library missing])])
 
+# with libltdl
+AC_ARG_WITH([libltdl],
+            AS_HELP_STRING([--with-libltdl], [Enforce libltdl DSO library]))
+
+# check libltdl
+AS_IF([test "x${with_libltdl}" != "xno"],
+      [AC_CHECK_LIB([ltdl],
+                    [lt_dlinit])])
+
+AS_IF([test "x${with_libltdl}" = "xyes"] && [test "${ac_cv_lib_ltdl_lt_dlinit}" = "no"],
+      [AC_MSG_ERROR([ltdl was specified but not found])])
+
+AS_IF([test "${ac_cv_lib_ltdl_lt_dlinit}" = "yes"],
+      [dso_handler="ltdl"])
+
+# check dlfcn fallback
+AS_IF([test "${dso_handler}" != "ltdl"],
+      [AC_CHECK_LIB([dl], [dlopen])]
+      [AS_IF([test "${ac_cv_lib_dl_dlopen}" = "no"],
+             [dso_handler=[""]]
+             [AC_MSG_NOTICE([libltdl nor libdl available. No DSO support.])])]
+      [AS_IF([test "${ac_cv_lib_dl_dlopen}" = "yes"],
+             [dso_handler="dlfcn"])])
+
+# DSO variables and defines
+AS_IF([test -n "${dso_handler}"],
+      [AM_CONDITIONAL([DSO_DLFCN], [test "${dso_handler}" = "dlfcn"])]
+      [AM_CONDITIONAL([DSO_LTDL], [test "${dso_handler}" = "ltdl"])]
+      [AC_DEFINE([XTNT_HAVE_DSO], [1], [A DSO Handler was detected])])
+
 ## Options
 # Tree Max Height determines total nodes supported in AVL/RB Trees
 AC_ARG_WITH([tree-max-height],
