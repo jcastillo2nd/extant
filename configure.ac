@@ -87,9 +87,10 @@ AC_DEFINE_UNQUOTED([BUILD_RELEASE], [$BUILD_RELEASE], [Date of build for release
 
 PKG_CHECK_MODULES([libcheck],
                   [check],
-                  [HAS_CHECK="yes"],
-                  [HAS_CHECK="no"])
-AS_IF([test "x${HAS_CHECK}" = "xyes"],[BUILD_TESTS="tests"],[AC_MSG_WARN([check framework not found. Unit testing not available.])])
+                  [LIBCHECK="yes"])
+AS_IF([test "x${LIBCHECK}" != "xyes"],
+      [AC_MSG_WARN([libcheck not found. Unit tests not available.])],
+      [AM_CONDITIONAL([HAVE_LIBCHECK], [true])])
 
 # Program Tests 
 AC_CONFIG_FILES([tests/Makefile])
@@ -103,10 +104,6 @@ AC_OUTPUT([doc/Doxyfile])
 
 # Program Source
 AC_CONFIG_FILES([src/Makefile])
-
-# Setup SUBDIRS in Makefile.am
-AC_SUBST([BUILD_SUBDIRS], [m4_join([ ], [${BUILD_TESTS}])])
-AC_SUBST([EXTRAS], [m4_join([ ], [${BUILD_DOC}])])
 
 # Package
 AC_CONFIG_FILES([Makefile])

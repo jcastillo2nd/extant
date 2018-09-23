@@ -11,7 +11,3 @@ TESTS = common_tests
 check_PROGRAMS = common_tests
 
 common_tests_SOURCES = common.c
-
-EXTRA_DIST = dso \
-			 log \
-			 set

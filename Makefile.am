@@ -4,9 +4,12 @@ endif
 
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS = src @BUILD_SUBDIRS@
+SUBDIRS = src
 if HAVE_DOXYGEN
 SUBDIRS += doc
 endif
+if HAVE_LIBCHECK
+SUBDIRS += tests
+endif
 
-EXTRA_DIST = include @EXTRAS@
+EXTRA_DIST = include
