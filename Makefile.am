@@ -1,5 +1,12 @@
+if HAVE_DOXYGEN
+.PHONY: doc
+endif
+
 ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = src @BUILD_SUBDIRS@
+if HAVE_DOXYGEN
+SUBDIRS += doc
+endif
 
 EXTRA_DIST = include @EXTRAS@

@@ -20,13 +20,13 @@ LT_INIT
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # BUILD_SUBDIRS
-BUILD_DOC=""
 BUILD_TESTS=""
 
 # Doxygen Check
 AC_PATH_PROG([DOXYGEN], [doxygen], [no])
-AM_CONDITIONAL([HAS_DOXYGEN], [test "x$DOXYGEN" != "xno"])
-AS_IF([test "x${HAS_DOXYGEN}" = "xyes"],[BUILD_DOC="doc"],[AC_MSG_WARN([Doxygen not found. Docs not available.])])
+AS_IF([test "x${DOXYGEN}" != "xno"],
+      [AM_CONDITIONAL([HAVE_DOXYGEN], [true])],
+      [AC_MSG_WARN([Doxygen not found. Docs not available.])])
 
 # pthread
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
@@ -62,20 +62,13 @@ AS_IF([test -n "${dso_handler}"],
       [AM_CONDITIONAL([DSO_LTDL], [test "${dso_handler}" = "ltdl"])]
       [AC_DEFINE([XTNT_HAVE_DSO], [1], [A DSO Handler was detected])])
 
-## Options
-# Tree Max Height determines total nodes supported in AVL/RB Trees
+# Options
 AC_ARG_WITH([tree-max-height],
             AS_HELP_STRING([--with-tree-max-height],
                            [Set AVL/RB tree max height [(default: 16)]]),
             [tree_max_height=$withval],
             [tree_max_height=16,
              AC_DEFINE_UNQUOTED([XTNT_TREE_MAX_HEIGHT], [$tree_max_height], [AVL/RB tree max height (Advanced usage)])])
-#            [AC_SUBST([XTNT_TREE_MAX_HEIGHT],
-#                      [$withval])],
-#            [AC_SUBST([with_tree_max_height],
-#                      [16])])
-
-#AC_MSG_NOTICE ([[Received with_tree_max_height as $tree_with_max_height]])
 
 AS_IF([test -n "${with_tree_max_height}"],
       [AS_IF([test "$tree_max_height" -eq "$tree_max_height"],
@@ -83,11 +76,6 @@ AS_IF([test -n "${with_tree_max_height}"],
                     [AC_DEFINE_UNQUOTED([XTNT_TREE_MAX_HEIGHT], [$tree_max_height], [AVL/RB tree max height (Advanced usage)])
                      AC_MSG_NOTICE([XTNT_TREE_MAX_HEIGHT set to $with_tree_max_height (Advanced usage)])],
                     [AC_MSG_ERROR([tree max height must be an integer of 8 or greater])])])])
-
-#AS_IF([test -n "${with_tree_max_height}"] [test "$tree_max_height" -eq "$tree_max_height"] && [test "$tree_max_height" -gt 7],
-#      [AC_DEFINE_UNQUOTED([XTNT_TREE_MAX_HEIGHT], [$tree_max_height], [AVL/RB tree max height (Advanced usage)])
-#       AC_MSG_NOTICE([XTNT_TREE_MAX_HEIGHT set to $with_tree_max_height (Advanced usage)])],
-#      [AC_MSG_ERROR([tree max height must be an integer of 8 or greater])])
 
 # Convenience defines
 AC_SUBST([START_YEAR], [2016])
@@ -111,13 +99,13 @@ AC_CONFIG_FILES([tests/set/Makefile])
 
 # Program Docs
 AC_CONFIG_FILES([doc/Makefile])
-AC_CONFIG_FILES([doc/Doxyfile])
+AC_OUTPUT([doc/Doxyfile])
 
 # Program Source
 AC_CONFIG_FILES([src/Makefile])
 
 # Setup SUBDIRS in Makefile.am
-AC_SUBST([BUILD_SUBDIRS], [m4_join([ ], [${BUILD_TESTS}], [$BUILD_DOC])])
+AC_SUBST([BUILD_SUBDIRS], [m4_join([ ], [${BUILD_TESTS}])])
 AC_SUBST([EXTRAS], [m4_join([ ], [${BUILD_DOC}])])
 
 # Package
