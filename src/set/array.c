@@ -148,23 +148,28 @@ struct xtnt_node *xtnt_array_get(
  * @param[in] index The index to insert the node at
  * @return node pointer or NULL on failure
  */
-struct xtnt_node *xtnt_array_insert(
+xtnt_int_t xtnt_array_insert(
         struct xtnt_node_set *array,
         struct xtnt_node *node,
         xtnt_uint_t index)
 {
-    xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
-    if (fail) {
+    xtnt_int_t fail = XTNT_SUCCESS;
+    fail = pthread_mutex_lock(&(array->lock));
+    if (fail == 0) {
+        if (index < array->count) {
+                ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] = node;
+        } else {
+            fail = EINVAL;
+        }
+        xtnt_int_t fail_unlock = pthread_mutex_unlock(&(array->lock));
+        if (fail_unlock){
+            XTNT_NODES_LOCK_SET_FAIL(array->state);
+            fail = fail_unlock;
+        }
+    } else {
         XTNT_NODES_LOCK_SET_FAIL(array->state);
     }
-    if (index < array->count) {
-            ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] = node;
-    }
-    fail = pthread_mutex_unlock(&(array->lock));
-    if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
-    }
-    return NULL;
+    return fail;
 }
 
 /**

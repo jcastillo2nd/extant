@@ -53,7 +53,7 @@ struct xtnt_node *xtnt_array_get(
         struct xtnt_node_set *array,
         xtnt_uint_t index);
 
-struct xtnt_node *xtnt_array_insert(
+xtnt_int_t xtnt_array_insert(
         struct xtnt_node_set *array,
         struct xtnt_node *node,
         xtnt_uint_t index);

@@ -71,18 +71,18 @@ struct xtnt_node_set {
     pthread_mutex_t lock;
 };
 
-struct xtnt_node *xtnt_node_initialize(
+xtnt_int_t xtnt_node_initialize(
         struct xtnt_node *node,
         xtnt_uint_t key,
         void *value);
 
-struct xtnt_node_set *xtnt_node_set_initialize(
+xtnt_int_t xtnt_node_set_initialize(
         struct xtnt_node_set *set);
 
-void *xtnt_node_uninitialize(
+xtnt_int_t xtnt_node_uninitialize(
         struct xtnt_node *node);
 
-struct xtnt_node_set *xtnt_node_set_uninitialize(
+xtnt_int_t xtnt_node_set_uninitialize(
         struct xtnt_node_set *set);
 
 #endif /* ifndef _XTNT_SET_COMMON_H_ */
