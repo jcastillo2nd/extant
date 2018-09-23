@@ -105,6 +105,8 @@ AS_IF([test "x${HAS_CHECK}" = "xyes"],[BUILD_TESTS="tests"],[AC_MSG_WARN([check 
 
 # Program Tests 
 AC_CONFIG_FILES([tests/Makefile])
+AC_CONFIG_FILES([tests/dso/Makefile])
+AC_CONFIG_FILES([tests/log/Makefile])
 AC_CONFIG_FILES([tests/set/Makefile])
 
 # Program Docs

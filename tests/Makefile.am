@@ -1,4 +1,6 @@
-SUBDIRS = set
+SUBDIRS = dso \
+		  log \
+		  set
 
 AM_CPPFLAGS = -I$(top_srcdir)/include @libcheck_CFLAGS@
 
@@ -10,4 +12,6 @@ check_PROGRAMS = common_tests
 
 common_tests_SOURCES = common.c
 
-EXTRA_DIST = set
+EXTRA_DIST = dso \
+			 log \
+			 set

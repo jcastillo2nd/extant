@@ -27,56 +27,53 @@ SOFTWARE.
 ===============================================================================
 */
 
-#ifndef _XTNT_COMMON_H_
-#define _XTNT_COMMON_H_
+#include <check.h>
+#include <extant/log.h>
 
-#include <errno.h>
-#include <sched.h>
-#include <stdlib.h>
-#include <stdarg.h>
 #include <stdio.h>
-#include <pthread.h>
 
-#define XTNT_SUCCESS 0
-#define XTNT_FAILURE (~0)
+struct xtnt_logger *logger; 
 
-#if HAVE_LONG_LONG_INT == 1
+void setup(void)
+{
+}
 
-#define XTNT_INT_MAX LLONG_MAX
-#define XTNT_UINT_MAX ULLONG_MAX
-typedef long long int xtnt_int_t;
-typedef unsigned long long int xtnt_uint_t;
+void teardown(void)
+{
+}
 
-#elif HAVE_LONG_INT == 1
+START_TEST (test_xtnt_log)
+{
+}
+END_TEST
 
-#define XTNT_INT_MAX LONG_MAX
-#define XTNT_UINT_MAX ULONG_MAX
-typedef long int xtnt_int_t;
-typedef unsigned long int xtnt_uint_t;
+Suite * xtnt_log_suite(void)
+{
+    Suite *s;
+    TCase *tc_log;
 
-#else
+    s = suite_create("xtnt_log");
 
-#define XTNT_INT_MAX INT_MAX
-#define XTNT_UINT_MAX UINT_MAX
-typedef int xtnt_int_t;
-typedef unsigned int xtnt_uint_t;
+    tc_log = tcase_create("Logging");
 
-#endif /* ifdef HAVE_LONG_LONG_INT */
+    tcase_add_checked_fixture(tc_log, setup, teardown);
+    tcase_add_test(tc_log, test_xtnt_log);
+    suite_add_tcase(s, tc_log);
 
-#if HAVE_LONG_DOUBLE == 1
+    return s;
+}
 
-typedef long double xtnt_real_t;
+int main(void)
+{
+    int failed;
+    Suite *s;
+    SRunner *sr;
 
-#elif HAVE_DOUBLE == 1
+    s = xtnt_log_suite();
+    sr = srunner_create(s);
 
-typedef double xtnt_real_t;
-
-#else
-
-typedef float xtnt_real_t;
-
-#endif /* HAVE_LONG_DOUBLE == 1 */
-
-xtnt_uint_t xtnt_hash(void *key);
-
-#endif /* ifndef _XTNT_COMMON_H */
+    srunner_run_all(sr, CK_VERBOSE);
+    failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return (failed == 0) ? 0 : failed;
+}

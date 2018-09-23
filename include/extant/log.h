@@ -50,48 +50,50 @@ struct xtnt_logger
 {
     FILE *log;
     char *filename;
-    struct xtnt_node_set *queue;
-    xtnt_uint_t level;
+    xtnt_uint_t default_level;
+    struct xtnt_node_set queue;
     pthread_mutex_t lock;
 };
 
-void xtnt_log(
+struct xtnt_logger_entry
+{
+    void *fmt_fn;
+    void *data;
+    char *msg;
+    size_t msg_length;
+    xtnt_uint_t level;
+    struct xtnt_node node;
+};
+
+xtnt_int_t xtnt_log(
     struct xtnt_logger *logger,
-    xtnt_uint_t level,
-    static char *file,
-    static char *line,
-    static char *fmt,
-    ...);
+    struct xtnt_logger_entry *entry);
 
 struct xtnt_logger *xtnt_logger_create(
-    xtnt_uint_t level,
     FILE *log,
-    static char *filename);
+    const char *filename);
 
 void xtnt_logger_destroy(
-    struct xtnt_logger *log);
+    struct xtnt_logger *logger);
 
-xtnt_uint_t xtnt_logger_process(
-    static xtnt_logger *logger);
+struct xtnt_logger_entry *xtnt_logger_entry_create(
+    size_t data_length,
+    size_t msg_length);
 
-void *xtnt_logger_level_set(
+void xtnt_logger_entry_destroy(
+    struct xtnt_logger_entry *entry);
+
+xtnt_int_t xtnt_logger_initialize(
+    struct xtnt_logger *logger);
+
+void xtnt_logger_process(
+    struct xtnt_logger *logger);
+
+xtnt_int_t xtnt_logger_uninitialize(
+    struct xtnt_logger *logger);
+
+xtnt_int_t xtnt_logger_level_set(
     struct xtnt_logger *logger,
     xtnt_uint_t level);
-
-#define XTNT_LOG_CRITICAL(logger, ...) \
-    xtnt_log(logger, XTNT_LOG_LEVEL_CRITICAL, __FILE__, __LINE__, __VA_ARGS__);
-
-#define XTNT_LOG_ERROR(logger, ...) \
-    xtnt_log(logger, XTNT_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__);
-
-#define XTNT_LOG_WARNING(logger, ...) \
-    xtnt_log(logger, XTNT_LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__);
-
-#define XTNT_LOG_INFO(logger, ...) \
-    xtnt_log(logger, XTNT_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__);
-
-#define XTNT_LOG_DEBUG(logger, ...) \
-    xtnt_log(logger, XTNT_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__);
-
 
 #endif /* _XTNT_LOG_H_ */
