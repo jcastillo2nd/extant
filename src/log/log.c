@@ -77,8 +77,15 @@ struct xtnt_logger *xtnt_logger_create(
                         res->log = fopen(filename, "a+");
                     }
                 }
+                fail = pthread_mutex_unlock(&(res->lock));
+                if (fail){
+                    XTNT_LOCK_SET_FAIL(res->state);
+                }
+            } else {
+                XTNT_LOCK_SET_FAIL(res->state);
             }
-            fail = pthread_mutex_unlock(&(res->lock));
+        } else {
+            XTNT_LOCK_SET_FAIL(res->state);
         }
     }
     return res;
@@ -215,12 +222,20 @@ xtnt_int_t xtnt_logger_uninitialize(
 {
     xtnt_int_t fail = XTNT_SUCCESS;
     fail = pthread_mutex_lock(&(logger->lock));
-    logger->log = NULL;
-    logger->filename = NULL;
-    logger->default_level = XTNT_LOG_LEVEL_DEFAULT;
-    xtnt_node_set_uninitialize(&(logger->queue));
-    fail = pthread_mutex_unlock(&(logger->lock));
-    fail = pthread_mutex_destroy(&(logger->lock));
+    if (fail == XTNT_SUCCESS){
+        logger->log = NULL;
+        logger->filename = NULL;
+        logger->default_level = XTNT_LOG_LEVEL_DEFAULT;
+        xtnt_node_set_uninitialize(&(logger->queue));
+        fail = pthread_mutex_unlock(&(logger->lock));
+        if (fail == XTNT_SUCCESS){
+            fail = pthread_mutex_destroy(&(logger->lock));
+        } else {
+            XTNT_LOCK_SET_FAIL(logger->state);
+        }
+    } else {
+        XTNT_LOCK_SET_FAIL(logger->state);
+    }
     return fail;
 }
 

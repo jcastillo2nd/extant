@@ -35,7 +35,7 @@ struct xtnt_node *xtnt_queue_peek(
     struct xtnt_node *peek = NULL;
     xtnt_uint_t fail = pthread_mutex_lock(&(queue->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(queue->state);
+        XTNT_LOCK_SET_FAIL(queue->state);
 		return NULL;
 	}
 	if (queue->link[XTNT_NODE_TAIL] != NULL){
@@ -43,7 +43,7 @@ struct xtnt_node *xtnt_queue_peek(
 	}
 	fail = pthread_mutex_unlock(&(queue->lock));
         if (fail){
-            XTNT_NODES_LOCK_SET_FAIL(queue->state);
+            XTNT_LOCK_SET_FAIL(queue->state);
 	}
     return peek;
 }
@@ -54,7 +54,7 @@ struct xtnt_node *xtnt_queue_pop(
     struct xtnt_node *popped = NULL;
     xtnt_uint_t fail = pthread_mutex_lock(&(queue->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(queue->state);
+        XTNT_LOCK_SET_FAIL(queue->state);
         return NULL;
     }
     if (queue->link[XTNT_NODE_TAIL] != NULL){
@@ -72,7 +72,7 @@ struct xtnt_node *xtnt_queue_pop(
     }
     fail = pthread_mutex_unlock(&(queue->lock));
     if (fail){
-        XTNT_NODES_LOCK_SET_FAIL(queue->state);
+        XTNT_LOCK_SET_FAIL(queue->state);
     }
     return popped;
 }
@@ -83,7 +83,7 @@ struct xtnt_node *xtnt_queue_push(
 {
     xtnt_int_t fail = pthread_mutex_lock(&(queue->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(queue->state);
+        XTNT_LOCK_SET_FAIL(queue->state);
         return NULL;
     }
     if (queue->link[XTNT_NODE_HEAD] != NULL) {
@@ -97,7 +97,7 @@ struct xtnt_node *xtnt_queue_push(
     queue->count++;
     fail = pthread_mutex_unlock(&(queue->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(queue->state);
+        XTNT_LOCK_SET_FAIL(queue->state);
     }
     return node;
 }

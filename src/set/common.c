@@ -79,10 +79,10 @@ xtnt_int_t xtnt_node_uninitialize(
         if (fail == 0){
             fail = pthread_mutex_destroy(&(node->lock));
         } else {
-            XTNT_NODES_LOCK_SET_FAIL(node->state);
+            XTNT_LOCK_SET_FAIL(node->state);
         }
     } else {
-        XTNT_NODES_LOCK_SET_FAIL(node->state);
+        XTNT_LOCK_SET_FAIL(node->state);
     }
     return fail;
 }
@@ -107,10 +107,10 @@ xtnt_int_t xtnt_node_set_initialize(
             set->state = 0;
             fail = pthread_mutex_unlock(&(set->lock));
         } else {
-            XTNT_NODES_LOCK_SET_FAIL(set->state);
+            XTNT_LOCK_SET_FAIL(set->state);
         }
     } else {
-        XTNT_NODES_LOCK_SET_FAIL(set->state);
+        XTNT_LOCK_SET_FAIL(set->state);
     }
     return fail;
 }
@@ -140,10 +140,10 @@ xtnt_int_t xtnt_node_set_uninitialize(
         if (fail == 0){
             fail = pthread_mutex_destroy(&(set->lock));
         } else {
-            XTNT_NODES_LOCK_SET_FAIL(set->state);
+            XTNT_LOCK_SET_FAIL(set->state);
         }
     } else {
-        XTNT_NODES_LOCK_SET_FAIL(set->state);
+        XTNT_LOCK_SET_FAIL(set->state);
     }
     return fail;
 }

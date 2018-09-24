@@ -50,6 +50,7 @@ struct xtnt_logger
 {
     FILE *log;
     char *filename;
+    xtnt_uint_t state;
     xtnt_uint_t default_level;
     struct xtnt_node_set queue;
     pthread_mutex_t lock;

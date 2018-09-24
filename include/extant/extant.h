@@ -30,13 +30,17 @@ SOFTWARE.
 #ifndef _XTNT_H_
 #define _XTNT_H_
 
-#ifndef _XTNT_COMMON_H_
-#include <extant/common.h>
-#endif /* _XTNT_COMMON_H_ */
+#ifndef _XTNT_DSO_H_
+#include <extant/dso.h>
+#endif /* _XTNT_DSO_H_ */
 
 #ifndef _XTNT_LOG_H_
 #include <extant/log.h>
 #endif /* _XTNT_LOG_H_ */
+
+#ifndef _XTNT_MEMORY_H_
+#include <extant/memory.h>
+#endif /* _XTNT_MEMORY_H_ */
 
 #ifndef _XTNT_SET_H_
 #include <extant/set.h>

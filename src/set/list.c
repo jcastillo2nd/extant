@@ -44,7 +44,7 @@ struct xtnt_node *xtnt_list_delete(
     xtnt_uint_t dir = 0;
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     if (list->count > index) {
@@ -84,7 +84,7 @@ struct xtnt_node *xtnt_list_delete(
     }
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }
     return removed;
 }
@@ -106,7 +106,7 @@ struct xtnt_node *xtnt_list_insert(
 {
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     // Are we special case 0 elements?
@@ -125,7 +125,7 @@ struct xtnt_node *xtnt_list_insert(
     list->count++;
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }   
     return node;
 }
@@ -161,7 +161,7 @@ struct xtnt_node *xtnt_list_replace(
     xtnt_uint_t dir = 0;
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     if (list->count > index) {
@@ -194,7 +194,7 @@ struct xtnt_node *xtnt_list_replace(
     }
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }
     return found;
 }
@@ -214,7 +214,7 @@ struct xtnt_node *xtnt_list_get(
     xtnt_uint_t dir = 0;
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     if (list->count > index) {
@@ -235,7 +235,7 @@ struct xtnt_node *xtnt_list_get(
     }
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }
     return got;
 }
@@ -255,7 +255,7 @@ struct xtnt_node *xtnt_list_search(
     struct xtnt_node *test = NULL;
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     test = list->link[XTNT_NODE_HEAD];
@@ -267,7 +267,7 @@ struct xtnt_node *xtnt_list_search(
     } while (test->link[XTNT_NODE_TAIL] != NULL);
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }
     return found;
 }
@@ -296,7 +296,7 @@ struct xtnt_node *xtnt_list_search_fn(
     xtnt_uint_t (*test)(void *, struct xtnt_node *) = test_fn;
     xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
         return NULL;
     }
     testing = list->link[XTNT_NODE_HEAD];
@@ -308,7 +308,7 @@ struct xtnt_node *xtnt_list_search_fn(
     } while (testing->link[XTNT_NODE_TAIL] != NULL);
     fail = pthread_mutex_unlock(&(list->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(list->state);
+        XTNT_LOCK_SET_FAIL(list->state);
     }
     return found;
 }

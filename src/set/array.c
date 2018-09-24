@@ -44,7 +44,7 @@ struct xtnt_node_set *xtnt_array_create(
     if (created != NULL) {
         xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
         if (fail) {
-            XTNT_NODES_LOCK_SET_FAIL(array->state);
+            XTNT_LOCK_SET_FAIL(array->state);
             return NULL;
         }
         array->link[XTNT_NODE_HEAD] = created;
@@ -52,7 +52,7 @@ struct xtnt_node_set *xtnt_array_create(
         array->count = count; 
         fail = pthread_mutex_unlock(&(array->lock));
         if (fail) {
-            XTNT_NODES_LOCK_SET_FAIL(array->state);
+            XTNT_LOCK_SET_FAIL(array->state);
         }
         return array; 
     }
@@ -69,7 +69,7 @@ void xtnt_array_destroy(
 {
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     free(array->link[XTNT_NODE_HEAD]);
     array->link[XTNT_NODE_HEAD] = \
@@ -77,7 +77,7 @@ void xtnt_array_destroy(
     array->count = 0;
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
 }
 
@@ -97,7 +97,7 @@ struct xtnt_node *xtnt_array_delete(
     struct xtnt_node *deleted = NULL;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     if (index < array->count) {
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
@@ -107,7 +107,7 @@ struct xtnt_node *xtnt_array_delete(
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     return deleted;
 }
@@ -126,7 +126,7 @@ struct xtnt_node *xtnt_array_get(
     struct xtnt_node *got = NULL;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     if (index < array->count) {
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
@@ -135,7 +135,7 @@ struct xtnt_node *xtnt_array_get(
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     return got;
 }
@@ -163,11 +163,11 @@ xtnt_int_t xtnt_array_insert(
         }
         xtnt_int_t fail_unlock = pthread_mutex_unlock(&(array->lock));
         if (fail_unlock){
-            XTNT_NODES_LOCK_SET_FAIL(array->state);
+            XTNT_LOCK_SET_FAIL(array->state);
             fail = fail_unlock;
         }
     } else {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     return fail;
 }
@@ -186,7 +186,7 @@ struct xtnt_node *xtnt_array_search(
     struct xtnt_node *found = NULL;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
         return NULL;
     }
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
@@ -198,7 +198,7 @@ struct xtnt_node *xtnt_array_search(
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     return found;
 }
@@ -220,7 +220,7 @@ struct xtnt_node *xtnt_array_search_fn(
     xtnt_uint_t (*test)(void *, void *) = test_fn;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
         return NULL;
     }
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
@@ -232,7 +232,7 @@ struct xtnt_node *xtnt_array_search_fn(
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_NODES_LOCK_SET_FAIL(array->state);
+        XTNT_LOCK_SET_FAIL(array->state);
     }
     return found;
 }

@@ -34,18 +34,6 @@ SOFTWARE.
 #include <extant/common.h>
 #endif
 
-#define XTNT_NODE(N) (N->value)
-#define XTNT_NODE_KEY_CMP(X, Y) ((X<Y)?-1:(X>Y))
-
-#define XTNT_NODES_MODE(N) (N & 3)
-#define XTNT_NODES_MODE_SET(N, M) ((N & !3) | M)
-#define XTNT_NODES_MODE_SET_VALUE(N, M) N = XTNT_NODES_MODE_SET(N, M)
-
-#define XTNT_NODES_LOCK(L) (L & 4)
-#define XTNT_NODES_LOCK_SET(L, R) ((L & !4) | R)
-#define XTNT_NODES_LOCK_FAIL 4
-#define XTNT_NODES_LOCK_SET_FAIL(N) N = XTNT_NODES_LOCK_SET(N, XTNT_NODES_LOCK_FAIL)
-
 #define XTNT_NODE_HEAD 0
 #define XTNT_NODE_LEFT 0
 #define XTNT_NODE_MIDDLE 1
