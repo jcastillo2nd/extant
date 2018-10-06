@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([extant], 0.1)
+AC_INIT([extant], 0.2)
 
 AC_LANG([C])
 
