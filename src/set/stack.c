@@ -26,3 +26,103 @@ SOFTWARE.
 
 ===============================================================================
 */
+
+#include <extant/set/stack.h>
+
+/**
+ * @brief Peek at the next entry in a stack
+ *
+ * @param[in] stack The xtnt_node_set to operate on
+ * @param[out] node The xtnt_node or NULL if stack is empty
+ * @retval XTNT_ESUCCESS on successful peek
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ * calls.
+ */
+xtnt_status_t
+xtnt_stack_peek(
+    struct xtnt_node_set *stack,
+    struct xtnt_node **node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
+        if (stack->link[XTNT_NODE_HEAD] != NULL) {
+            *node = stack->link[XTNT_NODE_HEAD];
+            res = XTNT_ESUCCESS;
+        }
+        if ((res = pthread_mutex_unlock(&(stack->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+    }
+    return res;
+}
+
+/**
+ * @brief Remove the next entry in the stack
+ *
+ * @param[in] stack The `xtnt_node_set` to operate on
+ * @param[out] node The xtnt_node or NULL if stack is empty
+ * @retval XTNT_ESUCCESS on successful pop
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ */
+xtnt_status_t
+xtnt_stack_pop(
+    struct xtnt_node_set *stack,
+    struct xtnt_node **node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
+        *node = stack->link[XTNT_NODE_HEAD];
+        if (*node != NULL) {
+            // Use of size_t to compare pointers lead to any bugs?
+            if ((size_t) stack->link[XTNT_NODE_HEAD] ^ (size_t) stack->link[XTNT_NODE_TAIL]) {
+                (*node)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = NULL;
+                stack->link[XTNT_NODE_HEAD] = (*node)->link[XTNT_NODE_TAIL];
+            } else {
+                stack->link[XTNT_NODE_HEAD] = NULL;
+                stack->link[XTNT_NODE_TAIL] = NULL;
+            }
+            stack->count--;
+        }
+        if ((res = pthread_mutex_unlock(&(stack->lock))) == XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+    }
+    return res;
+}
+
+/**
+ * @brief Add an entry to the stack
+ *
+ * @param[in] stack The `xtnt_node_set` to operate on
+ * @param[in] node The `xtnt_node` to add to the stack
+ * @retval XTNT_ESUCCESS on successful push
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ */
+xtnt_status_t
+xtnt_stack_push(
+    struct xtnt_node_set *stack,
+    struct xtnt_node *node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
+        if (stack->link[XTNT_NODE_TAIL] != NULL) {
+            stack->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
+            node->link[XTNT_NODE_TAIL] = stack->link[XTNT_NODE_HEAD];
+            stack->link[XTNT_NODE_HEAD] = node;
+        } else {
+            stack->link[XTNT_NODE_TAIL] = node;
+            stack->link[XTNT_NODE_HEAD] = node;
+        }
+        stack->count++;
+        if ((res = pthread_mutex_unlock(&(stack->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+    }
+    return res;
+}

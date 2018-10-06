@@ -8,7 +8,8 @@ libextant_la_SOURCES = extant.c \
 					   set/array.c \
 					   set/list.c \
 					   set/common.c \
-					   set/queue.c
+					   set/queue.c \
+					   set/stack.c
 
 if DSO_LTDL
 libextant_la_SOURCES += dso/dso.c dso/ltdl.c
