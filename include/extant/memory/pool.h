@@ -27,29 +27,32 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <extant/extant.h>
+#ifndef _XTNT_MEMORY_POOL_H_
+#define _XTNT_MEMORY_POOL_H_
 
-/**
- * @brief Generate a hash from a key
- *
- * Generate a unique integer evaluating the bytes of a key. There is collision
- * like MD5 sums but for keys < 128 bytes long this works well.
- *
- * @param[in] key Value to be hashed
- * @return xtnt_uint_t hash value
- */
-xtnt_uint_t xtnt_hash(void *key)
-{
-    const char *s = (const char*) key;
-    xtnt_uint_t sum = 0;
-    xtnt_int_t interval = 0;
-    for (xtnt_int_t idx = 0; s[idx] != 0; idx++) {
-        if (interval == 1) {
-            sum <<= sizeof(char);
-            interval--;
-        }
-        sum ^= (xtnt_int_t) s[idx];
-        interval++;
-    }
-    return sum;
-}
+#include <extant/error.h>
+
+#include <extant/memory/common.h>
+
+xtnt_status_t
+xtnt_mpool_allocate(
+    struct xtnt_memory_object *pool,
+    xtnt_uint_t count,
+    void **allocation);
+
+xtnt_status_t
+xtnt_mpool_create(
+    size_t size,
+    xtnt_uint_t count,
+    struct xtnt_memory_object **pool);
+
+xtnt_status_t
+xtnt_mpool_deallocate(
+    struct xtnt_memory_object *pool,
+    void **allocation);
+
+xtnt_status_t
+xtnt_mpool_destroy(
+    struct xtnt_memory_object **pool);
+
+#endif /* _XTNT_MEMORY_POOL_H_ */

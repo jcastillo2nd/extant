@@ -5,6 +5,7 @@ lib_LTLIBRARIES = libextant.la
 libextant_la_SOURCES = extant.c \
 					   common.c \
 					   log/log.c \
+					   set/array.c \
 					   set/list.c \
 					   set/common.c \
 					   set/queue.c

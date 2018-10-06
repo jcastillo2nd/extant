@@ -29,75 +29,101 @@ SOFTWARE.
 
 #include <extant/set/queue.h>
 
-struct xtnt_node *xtnt_queue_peek(
-        struct xtnt_node_set *queue)
+/**
+ * @brief Peek at the next entry in a queue
+ *
+ * @param[in] queue The xtnt_node_set to operate on
+ * @param[out] node The xtnt_node or NULL if queue is empty
+ * @retval XTNT_ESUCCESS on successful peek
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ * calls.
+ */
+xtnt_status_t
+xtnt_queue_peek(
+    struct xtnt_node_set *queue,
+    struct xtnt_node **node)
 {
-    struct xtnt_node *peek = NULL;
-    xtnt_uint_t fail = pthread_mutex_lock(&(queue->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(queue->state);
-		return NULL;
-	}
-	if (queue->link[XTNT_NODE_TAIL] != NULL){
-        peek = queue->link[XTNT_NODE_TAIL];
-	}
-	fail = pthread_mutex_unlock(&(queue->lock));
-        if (fail){
-            XTNT_LOCK_SET_FAIL(queue->state);
-	}
-    return peek;
-}
-
-struct xtnt_node *xtnt_queue_pop(
-        struct xtnt_node_set *queue)
-{
-    struct xtnt_node *popped = NULL;
-    xtnt_uint_t fail = pthread_mutex_lock(&(queue->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(queue->state);
-        return NULL;
-    }
-    if (queue->link[XTNT_NODE_TAIL] != NULL){
-        popped = queue->link[XTNT_NODE_TAIL];
-        // Use of size_t lead to any bugs?
-        if ((size_t) queue->link[XTNT_NODE_HEAD] ^
-            (size_t) queue->link[XTNT_NODE_TAIL]){
-            popped->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
-            queue->link[XTNT_NODE_TAIL] = popped->link[XTNT_NODE_HEAD];
-        } else {
-            queue->link[XTNT_NODE_TAIL] = NULL;
-            queue->link[XTNT_NODE_HEAD] = NULL;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(queue->lock))) == XTNT_ESUCCESS) {
+        if (queue->link[XTNT_NODE_TAIL] != NULL) {
+            *node = queue->link[XTNT_NODE_TAIL];
+            res = XTNT_ESUCCESS;
         }
-        queue->count--;
+        if ((res = pthread_mutex_unlock(&(queue->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(queue->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(queue->state);
     }
-    fail = pthread_mutex_unlock(&(queue->lock));
-    if (fail){
-        XTNT_LOCK_SET_FAIL(queue->state);
-    }
-    return popped;
+    return res;
 }
 
-struct xtnt_node *xtnt_queue_push(
-        struct xtnt_node_set *queue,
-        struct xtnt_node *node)
+/**
+ * @brief Remove the next entry in the queue
+ *
+ * @param[in] queue The `xtnt_node_set` to operate on
+ * @param[out] node The xtnt_node or NULL if queue is empty
+ * @retval XTNT_ESUCCESS on successful pop
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ */
+xtnt_status_t
+xtnt_queue_pop(
+    struct xtnt_node_set *queue,
+    struct xtnt_node **node)
 {
-    xtnt_int_t fail = pthread_mutex_lock(&(queue->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(queue->state);
-        return NULL;
-    }
-    if (queue->link[XTNT_NODE_HEAD] != NULL) {
-        queue->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
-        node->link[XTNT_NODE_TAIL] = queue->link[XTNT_NODE_HEAD];
-        queue->link[XTNT_NODE_HEAD] = node;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(queue->lock))) == XTNT_ESUCCESS) {
+        *node = queue->link[XTNT_NODE_TAIL];
+        if (*node != NULL) {
+            // Use of size_t lead to any bugs?
+            if ((size_t) queue->link[XTNT_NODE_HEAD] ^
+                (size_t) queue->link[XTNT_NODE_TAIL]) {
+                (*node)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
+                queue->link[XTNT_NODE_TAIL] = (*node)->link[XTNT_NODE_HEAD];
+            } else {
+                queue->link[XTNT_NODE_TAIL] = NULL;
+                queue->link[XTNT_NODE_HEAD] = NULL;
+            }
+            queue->count--;
+        }
+        if ((res = pthread_mutex_unlock(&(queue->lock))) == XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(queue->state);
+        }
     } else {
-        queue->link[XTNT_NODE_TAIL] = node;
-        queue->link[XTNT_NODE_HEAD] = node;
+        XTNT_LOCK_SET_LOCK_FAIL(queue->state);
     }
-    queue->count++;
-    fail = pthread_mutex_unlock(&(queue->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(queue->state);
+    return res;
+}
+
+/**
+ * @brief Add an entry to the queue
+ *
+ * @param[in] queue The `xtnt_node_set` to operate on
+ * @param[in] node The `xtnt_node` to add to the queue
+ * @retval XTNT_ESUCCESS on successful push
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
+ */
+xtnt_status_t
+xtnt_queue_push(
+    struct xtnt_node_set *queue,
+    struct xtnt_node *node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(queue->lock))) == XTNT_ESUCCESS) {
+        if (queue->link[XTNT_NODE_HEAD] != NULL) {
+            queue->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
+            node->link[XTNT_NODE_TAIL] = queue->link[XTNT_NODE_HEAD];
+            queue->link[XTNT_NODE_HEAD] = node;
+        } else {
+            queue->link[XTNT_NODE_TAIL] = node;
+            queue->link[XTNT_NODE_HEAD] = node;
+        }
+        queue->count++;
+        if ((res = pthread_mutex_unlock(&(queue->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(queue->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(queue->state);
     }
-    return node;
+    return res;
 }

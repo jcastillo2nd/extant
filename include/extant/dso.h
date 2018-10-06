@@ -30,6 +30,8 @@ SOFTWARE.
 #ifndef _XTNT_DSO_H_
 #define _XTNT_DSO_H_
 
+#include <extant/error.h>
+
 struct xtnt_dso
 {
     const char *name;
@@ -42,16 +44,23 @@ struct xtnt_dso_symbol
     void *ptr;
 };
 
-struct xtnt_dso *xtnt_dso_load(
+xtnt_status_t
+xtnt_dso_handle_create(
+    struct xtnt_dso **handle);
+
+xtnt_status_t
+xtnt_dso_load(
     struct xtnt_dso *handle,
     const char *name);
 
-void xtnt_dso_unload(
+xtnt_status_t
+xtnt_dso_symbol(
+    struct xtnt_dso *handle,
+    struct xtnt_dso_symbol **symbol,
+    const char *name);
+
+xtnt_status_t
+xtnt_dso_unload(
     struct xtnt_dso *handle);
-
-struct xtnt_dso_symbol *xtnt_dso_symbol(
-    struct xtnt_dso *handle,
-    struct xtnt_dso_symbol *symbol,
-    const char *name);
 
 #endif /* _XTNT_DSO_H_ */

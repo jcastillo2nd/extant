@@ -85,7 +85,10 @@ void teardown(void)
 
 START_TEST (test_xtnt_queue_peek)
 {
-    struct xtnt_node *node = xtnt_queue_peek(&queue1);
+    struct xtnt_node *node = NULL;
+    xtnt_status_t res = xtnt_queue_peek(&queue1, &node);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_peek to succeed");
     ck_assert_msg(node->key == 1,
         "Expected node of key 1 but got %u", node->key); 
 }
@@ -93,7 +96,10 @@ END_TEST
 
 START_TEST (test_xtnt_empty_queue_peek)
 {
-    struct xtnt_node *node = xtnt_queue_peek(&queue2);
+    struct xtnt_node *node = NULL;
+    xtnt_status_t res = xtnt_queue_peek(&queue2, &node);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_peek to succeed");
     ck_assert_msg(node == NULL,
         "Expected empty node, but received node.key=%u", node->key);
 }
@@ -101,7 +107,10 @@ END_TEST
 
 START_TEST (test_xtnt_queue_pop)
 {
-    struct xtnt_node *node = xtnt_queue_pop(&queue1);
+    struct xtnt_node *node = NULL;
+    xtnt_status_t res = xtnt_queue_pop(&queue1, &node);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_pop to succeed");
     ck_assert_msg(node->key == 1,
         "Expected node with key 1, but received node.key=%u", node->key);
 }
@@ -109,7 +118,10 @@ END_TEST
 
 START_TEST (test_xtnt_empty_queue_pop)
 {
-    struct xtnt_node *node = xtnt_queue_pop(&queue2);
+    struct xtnt_node *node = NULL;
+    xtnt_status_t res = xtnt_queue_pop(&queue2, &node);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_pop to succeed");
     ck_assert_msg(node == NULL,
         "Expected empty node, but received node.key=%u", node->key);
 }
@@ -117,18 +129,22 @@ END_TEST
 
 START_TEST (test_xtnt_queue_push)
 {
-    struct xtnt_node *node = xtnt_queue_push(&queue1, &node3q1);
+    xtnt_status_t res = xtnt_queue_push(&queue1, &node3q1);
     struct xtnt_node *head = queue1.link[XTNT_NODE_HEAD];
-    ck_assert_msg(head->key == node->key,
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_push to succeed");
+    ck_assert_msg(head->key == (&node3q1)->key,
         "Expected queue with node3 as tail, but have node.key=%u", head->key);
 }
 END_TEST
 
 START_TEST (test_xtnt_empty_queue_push)
 {
-    struct xtnt_node *node = xtnt_queue_push(&queue2, &node1q2);
+    xtnt_status_t res = xtnt_queue_push(&queue2, &node1q2);
     struct xtnt_node *tail = queue1.link[XTNT_NODE_TAIL];
-    ck_assert_msg(tail->key == node->key,
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_queue_push to succeed");
+    ck_assert_msg(tail->key == (&node1q2)->key,
         "Expected queue with tail.key as node.key, but have tail.key=%u", tail->key);
 }
 END_TEST

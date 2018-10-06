@@ -27,29 +27,19 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <extant/extant.h>
+#ifndef _XTNT_ERROR_H_
+#define _XTNT_ERROR_H_
 
-/**
- * @brief Generate a hash from a key
- *
- * Generate a unique integer evaluating the bytes of a key. There is collision
- * like MD5 sums but for keys < 128 bytes long this works well.
- *
- * @param[in] key Value to be hashed
- * @return xtnt_uint_t hash value
- */
-xtnt_uint_t xtnt_hash(void *key)
-{
-    const char *s = (const char*) key;
-    xtnt_uint_t sum = 0;
-    xtnt_int_t interval = 0;
-    for (xtnt_int_t idx = 0; s[idx] != 0; idx++) {
-        if (interval == 1) {
-            sum <<= sizeof(char);
-            interval--;
-        }
-        sum ^= (xtnt_int_t) s[idx];
-        interval++;
-    }
-    return sum;
-}
+#include <extant/common.h>
+
+typedef xtnt_int_t xtnt_status_t;
+
+#define XTNT_EFAILURE (-1)
+#define XTNT_ESUCCESS XTNT_ZERO
+#define XTNT_EWARNING (1)
+
+#define XTNT_IS_EFAILURE(S) (S < XTNT_ZERO)
+#define XTNT_IS_ESUCCESS(S) (S == XTNT_ZERO)
+#define XTNT_IS_EWARNING(S) (S > XTNT_ZERO)
+
+#endif /* _XTNT_ERROR_H_ */

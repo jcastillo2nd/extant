@@ -34,30 +34,41 @@ SOFTWARE.
 #include <extant/set/common.h>
 #endif /* _XTNT_SET_COMMON_H_ */
 
-struct xtnt_node *xtnt_list_delete(
-        struct xtnt_node_set *list,
-        xtnt_uint_t index);
+xtnt_status_t
+xtnt_list_delete(
+    struct xtnt_node_set *list,
+    xtnt_uint_t index,
+    struct xtnt_node **deleted);
 
-struct xtnt_node *xtnt_list_insert(
-        struct xtnt_node_set *list,
-        struct xtnt_node *node);
+xtnt_status_t
+xtnt_list_get(
+    struct xtnt_node_set *list,
+    xtnt_uint_t index,
+    struct xtnt_node **node);
 
-struct xtnt_node *xtnt_list_replace(
-        struct xtnt_node_set *list,
-        struct xtnt_node *node,
-        xtnt_uint_t index);
+xtnt_status_t
+xtnt_list_insert(
+    struct xtnt_node_set *list,
+    struct xtnt_node *node);
 
-struct xtnt_node *xtnt_list_get(
-        struct xtnt_node_set *list,
-        xtnt_uint_t index);
+xtnt_status_t
+xtnt_list_replace(
+    struct xtnt_node_set *list,
+    struct xtnt_node *node,
+    xtnt_uint_t index,
+    struct xtnt_node **replaced);
 
-struct xtnt_node *xtnt_list_search(
-        struct xtnt_node_set *list,
-        xtnt_uint_t key);
+xtnt_status_t
+xtnt_list_search(
+    struct xtnt_node_set *list,
+    xtnt_uint_t key,
+    struct xtnt_node **found);
 
-struct xtnt_node *xtnt_list_search_fn(
-        struct xtnt_node_set *list,
-        void *test_fn,
-        void *ctx);
+xtnt_status_t
+xtnt_list_search_fn(
+    struct xtnt_node_set *list,
+    void *test_fn,
+    void *ctx,
+    struct xtnt_node **found);
 
 #endif /* ifndef _XTNT_SET_LIST_H_ */

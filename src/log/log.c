@@ -34,18 +34,42 @@ SOFTWARE.
  *
  * @param[in] logger The logger handling the entry
  * @param[in] entry The entry to be logged
- * @return XTNT_SUCCESS or errno error from underlying call
+ * @retval XTNT_ESUCCESS on successful queue of entry to logger
+ * @retval return value of `pthread_mutex_lock()` or `pthread_mutex_unlock()`
  *
- * @note The logging system is a producer/consumer model. Once a log entry
- * is created, the producer should not perform any operations ( e.g. reuse )
- * the entry after sending it to the logger with this method.
+ * @note The logging system is a producer/consumer model. Once a log entry is
+ * queued with a logger, the producer should consider the entry immutable.
  */
-xtnt_int_t xtnt_log(
+xtnt_status_t
+xtnt_log(
     struct xtnt_logger *logger,
     struct xtnt_logger_entry *entry)
 {
-    xtnt_queue_push(&(logger->queue), &(entry->node));
-    return XTNT_SUCCESS;
+    return xtnt_queue_push(&(logger->queue), &(entry->node));
+}
+
+/**
+ * @brief Change an existing logger level
+ *
+ * @param[in] logger Logger reference to update
+ * @param[in] default_level New default level to set
+ * @retval Status of pthread_mutex operations or XTNT_ESUCCESS
+ */
+xtnt_status_t
+xtnt_logger_change_default_level(
+    struct xtnt_logger *logger,
+    xtnt_uint_t default_level)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(logger->lock))) == XTNT_ESUCCESS) {
+        logger->default_level = default_level;
+        if ((res = pthread_mutex_unlock(&(logger->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(logger->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(logger->state);
+    }
+    return res;
 }
 
 /**
@@ -53,54 +77,74 @@ xtnt_int_t xtnt_log(
  *
  * @param[in] log The FILE pointer for an open log file
  * @param[in] filename A filename for log file
- * @return xtnt_logger pointer or NULL if error
+ * @param[out] logger Pointer reference to store logger to
+ * @retval XTNT_ESUCCESS on allocation and initialization
+ * @retval status return of xtnt_logger_initialize
+ * @retval EINVAL on NULL log and NULL filename
+ * @retval errno on `fopen()`, `malloc()`, `pthread_mutex_lock()` or
+ * `pthread_mutex_unlock()`
  *
  * @note The logger is created regardless of the initialization attempt or
  * log files provided. Either the log FILE stream or writeable filename must
  * be provided. If the log file stream is invalid, this will result in errors
  * from the subsequent xtnt_log_process calls.
  */
-struct xtnt_logger *xtnt_logger_create(
+xtnt_status_t
+xtnt_logger_create(
     FILE *log,
-    const char *filename)
+    const char *filename,
+    struct xtnt_logger **logger)
 {
-    struct xtnt_logger *res = malloc(sizeof(struct xtnt_logger));
-    if(res != NULL){
-        xtnt_int_t fail = xtnt_logger_initialize(res);
-        if(fail == XTNT_SUCCESS){
-            fail = pthread_mutex_lock(&(res->lock));
-            if(fail == XTNT_SUCCESS){
-                res->log = log;
-                res->filename = (char *) filename;
-                if (res->log == NULL){
-                    if(res->filename != NULL){
-                        res->log = fopen(filename, "a+");
+    xtnt_status_t res = XTNT_ESUCCESS;
+    struct xtnt_logger *mlogger = malloc(sizeof(struct xtnt_logger));
+    if (mlogger != NULL) {
+        if ((res = xtnt_logger_initialize(mlogger)) == XTNT_ESUCCESS) {
+            if ((res = pthread_mutex_lock(&(mlogger->lock))) == XTNT_ZERO) {
+                mlogger->log = log;
+                mlogger->filename = (char *) filename;
+                if (mlogger->log == NULL){
+                    if(mlogger->filename != NULL){
+                        mlogger->log = fopen(filename, "a+");
+                        if (mlogger->log == NULL) {
+                            res = errno;
+                        }
+                    } else {
+                        res = EINVAL;
                     }
                 }
-                fail = pthread_mutex_unlock(&(res->lock));
-                if (fail){
-                    XTNT_LOCK_SET_FAIL(res->state);
+                if ((res = pthread_mutex_unlock(&(mlogger->lock)) != XTNT_ZERO)){
+                    XTNT_LOCK_SET_UNLOCK_FAIL(mlogger->state);
                 }
             } else {
-                XTNT_LOCK_SET_FAIL(res->state);
+                XTNT_LOCK_SET_LOCK_FAIL(mlogger->state);
             }
         } else {
-            XTNT_LOCK_SET_FAIL(res->state);
+            res = xtnt_logger_uninitialize(mlogger);
+            free(mlogger);
+            mlogger = NULL;
         }
+    } else {
+        res = errno;
     }
+    *logger = mlogger;
     return res;
 }
 
 /**
- * @brief Unitialize and deallocate an xtnt_logger
+ * @brief Uninitialize and deallocate an xtnt_logger
  *
  * @param[in] logger xtnt_logger to destroy
+ * @returns result of xtnt_logger_uninitialize
  */
-void xtnt_logger_destroy(
-    struct xtnt_logger *logger)
+xtnt_status_t
+xtnt_logger_destroy(
+    struct xtnt_logger **logger)
 {
-    xtnt_logger_uninitialize(logger);
+    xtnt_status_t res = XTNT_EFAILURE;
+    res = xtnt_logger_uninitialize(*logger);
     free(logger);
+    *logger = NULL;
+    return res;
 }
 
 /**
@@ -108,77 +152,98 @@ void xtnt_logger_destroy(
  *
  * @param[in] data_length Memory size allocated for data
  * @param[in] msg_length Memory size allocated for message
- * @param[in] level The log level for this entry
- * @return xtnt_logger_entry pointer or NULL on failure
+ * @param[in] level Level for log entry
+ * @param[in] fmt_fn Function for formatting string
+ * @param[out] entry Pointer reference to store entry to
+ * @retval XTNT_EFAILURE on allocation failure
+ * @retval XTNT_ESUCCESS on allocation and initialization
+ * @retval status of xtnt_node_initialize
+ * @retval errno of malloc
  */
-struct xtnt_logger_entry *xtnt_logger_entry_create(
+xtnt_status_t
+xtnt_logger_entry_create(
     size_t data_length,
-    size_t msg_length)
+    size_t msg_length,
+    void *fmt_fn,
+    xtnt_uint_t level,
+    struct xtnt_logger_entry **entry)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
+    xtnt_status_t res = XTNT_EFAILURE;
     void *data = malloc(data_length);
     void *msg = malloc(msg_length);
-    struct xtnt_logger_entry *entry = malloc(sizeof(struct xtnt_logger_entry));
-    if (data == NULL || msg == NULL || entry == NULL){
-        fail = XTNT_FAILURE;
-    }
-    if (fail == XTNT_SUCCESS){
-        entry->fmt_fn = NULL;
-        entry->data = data;
-        entry->msg = msg;
-        entry->msg_length = msg_length;
-        entry->level = XTNT_LOG_LEVEL_DEFAULT;
-        xtnt_node_initialize(&(entry->node), 0, entry);
+    *entry = malloc(sizeof(struct xtnt_logger_entry));
+    if (data != NULL || msg != NULL || entry != NULL){
+        (*entry)->fmt_fn = fmt_fn;
+        (*entry)->data = data;
+        (*entry)->msg = msg;
+        (*entry)->msg_length = msg_length;
+        (*entry)->level = level;
+        (*entry)->level = XTNT_LOG_LEVEL_DEFAULT;
+        if ((res = xtnt_node_initialize(&((*entry)->node), level, 0, *entry)) != XTNT_ESUCCESS) {
+            XTNT_STATE_SET_VALUE((*entry)->state, XTNT_LOG_ENTRY_INIT_FAIL);
+        }
     } else {
-        free(data);
-        free(msg);
         free(entry);
-        entry = NULL;
+        free(msg);
+        free(data);
+        *entry = NULL;
+        res = errno;
     }
-    return entry;
+    return res;
 }
 
 /**
  * @brief Uninitialize and deallocate an xtnt_logger_entry
  *
  * @param[in] entry xtnt_logger_entry to destroy
+ * @returns result of xtnt_node_uninitialize
  *
  * @note The logging is a producer/consumer model. This should not be called
  * by any thread other than the logger consumer.
  */
-void xtnt_logger_entry_destroy(
-    struct xtnt_logger_entry *entry)
+xtnt_status_t
+xtnt_logger_entry_destroy(
+    struct xtnt_logger_entry **entry)
 {
-    xtnt_node_uninitialize(&(entry->node));
-    free(entry->msg);
-    free(entry->data);
-    free(entry);
+    xtnt_status_t res = XTNT_ESUCCESS;
+    res = xtnt_node_uninitialize(&((*entry)->node));
+    free((*entry)->msg);
+    free((*entry)->data);
+    free(*entry);
+    *entry = NULL;
+    return res;
 }
 
 /**
  * @brief Initialize a xtnt_logger
  *
  * @param[in] logger The xtnt_logger to initialize
- * @return XTNT_SUCCESS or errno return values from called functions
+ * @returns result of mutex operations
  */
-xtnt_int_t xtnt_logger_initialize(
+xtnt_status_t
+xtnt_logger_initialize(
     struct xtnt_logger *logger)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_init(&(logger->lock), NULL);
-    if (fail){
-        return fail;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_init(&(logger->lock), NULL)) == XTNT_ZERO) {
+        if ((res = pthread_mutex_lock(&(logger->lock))) == XTNT_ZERO) {
+            logger->log = NULL;
+            logger->filename = NULL;
+            logger->default_level = XTNT_LOG_LEVEL_DEFAULT;
+            /** @todo upate xtnt_node_set_initialize to return xtnt_status_t */
+            if ((res = xtnt_node_set_initialize(&(logger->queue))) != XTNT_ZERO) {
+                XTNT_STATE_SET_VALUE(logger->state, XTNT_LOG_ENTRY_INIT_FAIL);
+            }
+            if ((res = pthread_mutex_unlock(&(logger->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_UNLOCK_FAIL(logger->state);
+            }
+        } else {
+            XTNT_LOCK_SET_LOCK_FAIL(logger->state);
+        }
+    } else {
+        XTNT_LOCK_SET_INIT_FAIL(logger->state);
     }
-    fail = pthread_mutex_lock(&(logger->lock));
-    if (fail){
-        return fail;
-    }
-    logger->log = NULL;
-    logger->filename = NULL;
-    logger->default_level = XTNT_LOG_LEVEL_DEFAULT;
-    xtnt_node_set_initialize(&(logger->queue));
-    fail = pthread_mutex_unlock(&(logger->lock));
-    return fail;
+    return res;
 }
 
 /**
@@ -190,23 +255,53 @@ xtnt_int_t xtnt_logger_initialize(
  * a logger. This thread will yield when logger is empty, but otherwise must
  * be terminated (e.g. pthread_cancel & pthread_join )
  */
-void xtnt_logger_process(
+void
+xtnt_logger_process(
     struct xtnt_logger *logger)
 {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+
+    xtnt_uint_t iter = XTNT_LOG_BATCH_SIZE;
+    xtnt_status_t res = XTNT_ESUCCESS;
+
     while (1){
-        struct xtnt_logger_entry *entry;
-        struct xtnt_node *node = xtnt_queue_pop(&(logger->queue));
-        if (node == NULL){
+        struct xtnt_logger_entry *entry= NULL;
+        struct xtnt_node *node = NULL;
+        xtnt_int_t error = errno;
+
+        pthread_mutex_lock(&(logger->lock));
+        xtnt_uint_t level = logger->default_level;
+        xtnt_uint_t state = XTNT_STATE(logger->state);
+        pthread_mutex_unlock(&(logger->lock));
+
+        if (state == XTNT_LOGGER_PENDING_EXIT) {
+            XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_COMPLETED_EXIT);
+        } else {
+            res = xtnt_queue_pop(&(logger->queue), &node);
+        }
+
+        if (node == NULL || !(iter)) {
+            iter = XTNT_LOG_BATCH_SIZE;
+            fflush(logger->log);
             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
             pthread_testcancel();
-            sched_yield();
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+            sched_yield();
         } else {
             entry = (struct xtnt_logger_entry *) node->value;
-            char * (*get_string)(void *) = entry->fmt_fn;
-            fputs(get_string(entry), logger->log);
-            xtnt_logger_entry_destroy(entry);
+            char * (*get_string)(struct xtnt_logger_entry *) = entry->fmt_fn;
+
+            /**
+             * @todo Review need for optimization for lock here.
+             */
+            if (entry->level & level) {
+                if(XTNT_IS_EFAILURE((res = fputs(get_string(entry), logger->log)))) {
+                    XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_WRITE_FAIL);
+                    pthread_exit(&error);
+                }
+            }
+            xtnt_logger_entry_destroy(&entry);
+            iter--;
         }
     }
 }
@@ -215,45 +310,24 @@ void xtnt_logger_process(
  * @brief Uninitialize an xtnt_logger
  *
  * @param[in] logger xtnt_logger to uninitialize
- * @return XTNT_SUCCESS, 0 or error from called functions
+ * @return XTNT_ESUCCESS or error from subfunctions
  */
-xtnt_int_t xtnt_logger_uninitialize(
+xtnt_status_t
+xtnt_logger_uninitialize(
     struct xtnt_logger *logger)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_lock(&(logger->lock));
-    if (fail == XTNT_SUCCESS){
-        logger->log = NULL;
-        logger->filename = NULL;
-        logger->default_level = XTNT_LOG_LEVEL_DEFAULT;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(logger->lock))) == XTNT_ZERO) {
         xtnt_node_set_uninitialize(&(logger->queue));
-        fail = pthread_mutex_unlock(&(logger->lock));
-        if (fail == XTNT_SUCCESS){
-            fail = pthread_mutex_destroy(&(logger->lock));
+        if ((res = pthread_mutex_unlock(&(logger->lock))) == XTNT_ZERO) {
+            if ((res = pthread_mutex_destroy(&(logger->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_DESTROY_FAIL(logger->state);
+            }
         } else {
-            XTNT_LOCK_SET_FAIL(logger->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(logger->state);
         }
     } else {
-        XTNT_LOCK_SET_FAIL(logger->state);
+        XTNT_LOCK_SET_LOCK_FAIL(logger->state);
     }
-    return fail;
-}
-
-/**
- * @brief Change logger default log level
- *
- * @param[in] logger xtnt_logger to update
- * @param[in] level New default log level
- * @return XTNT_SUCCESS, 0 or error from called functions
- */
-xtnt_int_t xtnt_logger_level_set(
-    struct xtnt_logger *logger,
-    xtnt_uint_t level)
-{
-    xtnt_int_t fail = pthread_mutex_lock(&(logger->lock));
-    if (!fail){
-        logger->default_level = level;
-    }
-    fail = pthread_mutex_unlock(&(logger->lock));
-    return fail;
+    return res;
 }

@@ -34,57 +34,73 @@ SOFTWARE.
  *
  * @param[in] node Node to initialize
  * @param[in] key Key to set for Node
+ * @param[in] quirk Namespace key for node reference
  * @param[in] value Node value pointer
  * @return xtnt_node pointer or NULL if error
  */
-xtnt_int_t xtnt_node_initialize(
-        struct xtnt_node *node,
-        xtnt_uint_t key,
-        void *value)
+xtnt_status_t
+xtnt_node_initialize(
+    struct xtnt_node *node,
+    xtnt_uint_t key,
+    xtnt_uint_t quirk,
+    void *value)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_init(&(node->lock), NULL);
-    if (fail == 0){
-        fail = pthread_mutex_lock(&(node->lock));
-        if (fail == 0){
-            node->key = key;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_init(&(node->lock), NULL)) == XTNT_ESUCCESS) {
+        if ((res = pthread_mutex_lock(&(node->lock))) == XTNT_ESUCCESS) {
             node->value = value;
             node->link[0] = NULL;
             node->link[1] = NULL;
             node->link[2] = NULL;
-            fail = pthread_mutex_unlock(&(node->lock));
+            node->key = key;
+            node->state = XTNT_ESUCCESS;
+            node->quirk = quirk;
+            if ((res = pthread_mutex_unlock(&(node->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_UNLOCK_FAIL(node->state);
+            }
+        } else {
+            XTNT_LOCK_SET_LOCK_FAIL(node->state);
         }
+    } else {
+        XTNT_LOCK_SET_INIT_FAIL(node->state);
     }
-    return fail;
+    return res;
 }
 
 /**
- * @brief Uninitialize a node
+ * @brief Copy a node set
  *
- * @param[in] node Node to uninitialize
- * @return void pointer to value
+ * @param[in] src The source node set
+ * @param[in] dst The destination node set
+ * @retval error on pthread lock
  */
-xtnt_int_t xtnt_node_uninitialize(
-        struct xtnt_node *node)
+xtnt_status_t
+xtnt_node_set_copy(
+    struct xtnt_node_set *src,
+    struct xtnt_node_set *dst)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_lock(&(node->lock));
-    if (fail == 0){
-        node->value = NULL;
-        node->link[0] = NULL;
-        node->link[1] = NULL;
-        node->link[2] = NULL;
-        node->key = 0;
-        fail = pthread_mutex_unlock(&(node->lock));
-        if (fail == 0){
-            fail = pthread_mutex_destroy(&(node->lock));
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(src->lock))) == XTNT_ESUCCESS) {
+        if ((res = pthread_mutex_lock(&(dst->lock))) == XTNT_ESUCCESS) {
+            dst->link[XTNT_NODE_HEAD] = src->link[XTNT_NODE_HEAD];
+            dst->link[XTNT_NODE_MIDDLE] = src->link[XTNT_NODE_MIDDLE];
+            dst->link[XTNT_NODE_TAIL] = src->link[XTNT_NODE_TAIL];
+            dst->count = src->count;
+            XTNT_STATE_SET_VALUE(dst->state, XTNT_ZERO);
+            if ((res = pthread_mutex_unlock(&(dst->lock))) == XTNT_ESUCCESS) {
+                if ((res = pthread_mutex_unlock(&(src->lock))) != XTNT_ESUCCESS) {
+                    XTNT_LOCK_SET_UNLOCK_FAIL(src->state);
+                }
+            } else {
+                XTNT_LOCK_SET_UNLOCK_FAIL(dst->state);
+            }
         } else {
-            XTNT_LOCK_SET_FAIL(node->state);
+            XTNT_LOCK_SET_LOCK_FAIL(dst->state);
         }
     } else {
-        XTNT_LOCK_SET_FAIL(node->state);
+        XTNT_LOCK_SET_LOCK_FAIL(src->state);
     }
-    return fail;
+    return res;
 }
 
 /**
@@ -92,27 +108,28 @@ xtnt_int_t xtnt_node_uninitialize(
  *
  * @param[in] set The Node Set to initialize
  */
-xtnt_int_t xtnt_node_set_initialize(
-        struct xtnt_node_set *set)
+xtnt_status_t
+xtnt_node_set_initialize(
+    struct xtnt_node_set *set)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_init(&(set->lock), NULL);
-    if (fail == 0) {
-        fail = pthread_mutex_lock(&(set->lock));
-        if (fail == 0){
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_init(&(set->lock), NULL)) == XTNT_ZERO) {
+        if ((res = pthread_mutex_lock(&(set->lock))) == XTNT_ZERO) {
             set->link[0] = NULL;
             set->link[1] = NULL;
             set->link[2] = NULL;
-            set->count = 0;
-            set->state = 0;
-            fail = pthread_mutex_unlock(&(set->lock));
+            set->count = XTNT_ZERO;
+            set->state = XTNT_ZERO;
+            if ((res = pthread_mutex_unlock(&(set->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_UNLOCK_FAIL(set->state);
+            }
         } else {
-            XTNT_LOCK_SET_FAIL(set->state);
+            XTNT_LOCK_SET_LOCK_FAIL(set->state);
         }
     } else {
-        XTNT_LOCK_SET_FAIL(set->state);
+        XTNT_LOCK_SET_INIT_FAIL(set->state);
     }
-    return fail;
+    return res;
 }
 
 /**
@@ -125,25 +142,45 @@ xtnt_int_t xtnt_node_set_initialize(
  * This destroys the mutex on the object. There must be no current operations
  * executed on this tree, or tree is uninitialized but NULL returned.
  */
-xtnt_int_t xtnt_node_set_uninitialize(
-        struct xtnt_node_set *set)
+xtnt_status_t
+xtnt_node_set_uninitialize(
+    struct xtnt_node_set *set)
 {
-    xtnt_int_t fail = XTNT_SUCCESS;
-    fail = pthread_mutex_lock(&(set->lock));
-    if (fail == 0){
-        set->link[0] = NULL;
-        set->link[1] = NULL;
-        set->link[2] = NULL;
-        set->count = 0;
-        set->state = 0;
-        fail = pthread_mutex_unlock(&(set->lock));
-        if (fail == 0){
-            fail = pthread_mutex_destroy(&(set->lock));
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(set->lock))) == XTNT_ZERO) {
+        if ((res = pthread_mutex_unlock(&(set->lock))) == XTNT_ZERO) {
+            if ((res = pthread_mutex_destroy(&(set->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_DESTROY_FAIL(set->state);
+            }
         } else {
-            XTNT_LOCK_SET_FAIL(set->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(set->state);
         }
     } else {
-        XTNT_LOCK_SET_FAIL(set->state);
+        XTNT_LOCK_SET_LOCK_FAIL(set->state);
     }
-    return fail;
+    return res;
+}
+
+/**
+ * @brief Uninitialize a node
+ *
+ * @param[in] node Node to uninitialize
+ */
+xtnt_status_t
+xtnt_node_uninitialize(
+    struct xtnt_node *node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(node->lock))) == XTNT_ZERO) {
+        if ((res = pthread_mutex_unlock(&(node->lock))) == XTNT_ZERO) {
+            if ((res = pthread_mutex_destroy(&(node->lock))) != XTNT_ZERO) {
+                XTNT_LOCK_SET_DESTROY_FAIL(node->state);
+            }
+        } else {
+            XTNT_LOCK_SET_UNLOCK_FAIL(node->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(node->state);
+    }
+    return res;
 }

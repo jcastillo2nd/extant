@@ -34,59 +34,96 @@ SOFTWARE.
  *
  * @param[in] list The Node List to add to
  * @param[in] index The position in the list to remove
+ * @param[out] deleted node removed from list
  * @return node removed or NULL on invalid index or error
  */
-struct xtnt_node *xtnt_list_delete(
-        struct xtnt_node_set *list,
-        xtnt_uint_t index)
+xtnt_status_t
+xtnt_list_delete(
+    struct xtnt_node_set *list,
+    xtnt_uint_t index,
+    struct xtnt_node **deleted)
 {
-    struct xtnt_node *removed = NULL;
-    xtnt_uint_t dir = 0;
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    if (list->count > index) {
-        // Array has index
-        if (index < (list->count >> 1)) {
-            // Start from head of list
-            removed = list->link[XTNT_NODE_HEAD];
-            dir = XTNT_NODE_TAIL;
+    xtnt_status_t res = XTNT_EFAILURE;
+    xtnt_uint_t dir = XTNT_NODE_HEAD;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        if (list->count > index) {
+            if (index < (list->count >> 1)) {
+                *deleted = list->link[XTNT_NODE_HEAD];
+                dir = XTNT_NODE_TAIL;
+            } else {
+                *deleted = list->link[XTNT_NODE_TAIL];
+                index = list->count - (index + 1);
+            }
+            for (xtnt_uint_t idx = 0; idx < index; idx++) {
+                *deleted = (*deleted)->link[dir];
+            }
+            if ((*deleted)->link[XTNT_NODE_HEAD] == NULL) {
+                if ((*deleted)->link[XTNT_NODE_TAIL] != NULL) {
+                    (*deleted)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = NULL;
+                    list->link[XTNT_NODE_HEAD] = (*deleted)->link[XTNT_NODE_TAIL]; 
+                } else {
+                    list->link[XTNT_NODE_HEAD] = NULL;
+                }
+            }
+            if ((*deleted)->link[XTNT_NODE_TAIL] == NULL) {
+                if ((*deleted)->link[XTNT_NODE_HEAD] != NULL) {
+                    (*deleted)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
+                    list->link[XTNT_NODE_TAIL] = (*deleted)->link[XTNT_NODE_HEAD];
+                } else {
+                    list->link[XTNT_NODE_TAIL] = NULL;
+                }
+            }
+            list->count--;
         } else {
-            // Start from tail of list
-            removed = list->link[XTNT_NODE_TAIL];
-            dir = XTNT_NODE_HEAD;
-            index = list->count - (index + 1);
+            *deleted = NULL;
         }
-        for (xtnt_uint_t idx = 0; idx < index; idx++) {
-            removed = removed->link[dir];
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
         }
-        if (removed->link[XTNT_NODE_HEAD] == NULL) {
-            if (removed->link[XTNT_NODE_TAIL] != NULL) {
-                // We are the head, and there are more nodes
-                removed->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = NULL;
-                list->link[XTNT_NODE_HEAD] = removed->link[XTNT_NODE_TAIL]; 
-            } else {
-                list->link[XTNT_NODE_HEAD] = NULL;
-            }
-        }
-        if (removed->link[XTNT_NODE_TAIL] == NULL) {
-            if (removed->link[XTNT_NODE_HEAD] != NULL) {
-                // We are the tail, and there are more nodes
-                removed->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
-                list->link[XTNT_NODE_TAIL] = removed->link[XTNT_NODE_HEAD];
-            } else {
-                list->link[XTNT_NODE_TAIL] = NULL;
-            }
-        }
-        list->count--;
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
+    return res;
+}
+
+/**
+ * @brief Get a list member
+ *
+ * @param[in] list The Node List to read
+ * @param[in] index The Node index to retreive
+ * @param[out] node The Node found at index or NULL
+ * @return node at index or NULL on invalid index or error
+ */
+xtnt_status_t
+xtnt_list_get(
+    struct xtnt_node_set *list,
+    xtnt_uint_t index,
+    struct xtnt_node **node)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    xtnt_uint_t dir = XTNT_NODE_HEAD;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        if (list->count > index) {
+            if (index < (list->count >> 1)) {
+                *node = list->link[XTNT_NODE_HEAD];
+                dir = XTNT_NODE_TAIL;
+            } else {
+                *node = list->link[XTNT_NODE_TAIL];
+                index = list->count - (index + 1);
+            }
+            for (xtnt_uint_t idx = 0; idx < index; idx++) {
+                *node = (*node)->link[dir];
+            }
+        } else {
+            *node = NULL;
+        }
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    return removed;
+    return res;
 }
 
 /**
@@ -100,34 +137,33 @@ struct xtnt_node *xtnt_list_delete(
  * Do not re-add an existing member to the list. To attach the same value,
  * create a new node with the value, and add the new node instead.
  */
-struct xtnt_node *xtnt_list_insert(
-        struct xtnt_node_set *list,
-        struct xtnt_node *node)
+xtnt_status_t
+xtnt_list_insert(
+    struct xtnt_node_set *list,
+    struct xtnt_node *node)
 {
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    // Are we special case 0 elements?
-    if (list->count == 0){
-        // We are the head and tail
-        list->link[XTNT_NODE_HEAD] = node;
-        list->link[XTNT_NODE_TAIL] = node;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        if (list->count == 0){
+            // We are the head and tail
+            list->link[XTNT_NODE_HEAD] = node;
+            list->link[XTNT_NODE_TAIL] = node;
+        } else {
+            // We have a new tail
+            node->link[XTNT_NODE_TAIL] = list->link[XTNT_NODE_HEAD];
+            // We are a new head to our tail
+            list->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
+            // We are the new head
+            list->link[XTNT_NODE_HEAD] = node;
+        }
+        list->count++;
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+        }
     } else {
-        // We have a new tail
-        node->link[XTNT_NODE_TAIL] = list->link[XTNT_NODE_HEAD];
-        // We are a new head to our tail
-        list->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
-        // We are the new head
-        list->link[XTNT_NODE_HEAD] = node;
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    list->count++;
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-    }   
-    return node;
+    return res;
 }
 
 /**
@@ -136,6 +172,7 @@ struct xtnt_node *xtnt_list_insert(
  * @param[in] list The Node Set to update
  * @param[in] node The node to replace with
  * @param[in] index The index to update at
+ * @param[out] replaced The Node that was replaced
  * @return node that was replaced or NULL on invalid index or error
  *
  * @remark
@@ -147,97 +184,54 @@ struct xtnt_node *xtnt_list_insert(
  * can have node.value updated to a new reference if `xtnt_list_search()`
  * returns a node from user code instead to re-use the node.
  *
- * @warn
+ * @warning
  * An already existing member node must not be used. If you need to set the
  * same value at another index, use a new `xtnt_node` initialized with the
- * value instead.
+ * same value instead.
  */
-struct xtnt_node *xtnt_list_replace(
-        struct xtnt_node_set *list,
-        struct xtnt_node *node,
-        xtnt_uint_t index)
+xtnt_status_t
+xtnt_list_replace(
+    struct xtnt_node_set *list,
+    struct xtnt_node *node,
+    xtnt_uint_t index,
+    struct xtnt_node **replaced)
 {
-    struct xtnt_node *found = NULL;
-    xtnt_uint_t dir = 0;
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    if (list->count > index) {
-        // Array has index
-        if (index < (list->count >> 1)) {
-            // Start from head of list
-            found = list->link[XTNT_NODE_HEAD];
-            dir = XTNT_NODE_TAIL;
+    xtnt_status_t res = XTNT_EFAILURE;
+    xtnt_uint_t dir = XTNT_NODE_HEAD;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        if (list->count > index) {
+            if (index < (list->count >> 1)) {
+                *replaced = list->link[XTNT_NODE_HEAD];
+                dir = XTNT_NODE_TAIL;
+            } else {
+                *replaced = list->link[XTNT_NODE_TAIL];
+                index = list->count - (index + 1);
+            }
+            for (xtnt_uint_t idx = 0; idx < index; idx++) {
+                *replaced = (*replaced)->link[dir];
+            }
+            node->link[XTNT_NODE_HEAD] = (*replaced)->link[XTNT_NODE_HEAD];
+            if ((*replaced)->link[XTNT_NODE_HEAD] != NULL) {
+                (*replaced)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = node;
+            } else {
+                list->link[XTNT_NODE_HEAD] = node; 
+            }
+            node->link[XTNT_NODE_TAIL] = (*replaced)->link[XTNT_NODE_TAIL];
+            if ((*replaced)->link[XTNT_NODE_TAIL] != NULL) {
+                (*replaced)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = node;
+            } else {
+                list->link[XTNT_NODE_HEAD] = node;
+            }
         } else {
-            // Start from tail of list
-            found = list->link[XTNT_NODE_TAIL];
-            dir = XTNT_NODE_HEAD;
-            index = list->count - (index + 1);
+            *replaced = NULL;
         }
-        for (xtnt_uint_t idx = 0; idx < index; idx++) {
-            found = found->link[dir];
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
         }
-        node->link[XTNT_NODE_HEAD] = found->link[XTNT_NODE_HEAD];
-        if (found->link[XTNT_NODE_HEAD] != NULL) {
-            found->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = node;
-        } else {
-            list->link[XTNT_NODE_HEAD] = node; 
-        }
-        node->link[XTNT_NODE_TAIL] = found->link[XTNT_NODE_TAIL];
-        if (found->link[XTNT_NODE_TAIL] != NULL) {
-            found->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = node;
-        } else {
-            list->link[XTNT_NODE_HEAD] = node;
-        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-    }
-    return found;
-}
-
-/**
- * @brief Get a list member
- *
- * @param[in] list The Node List to read
- * @param[in] index The Node index to retreive
- * @return node at index or NULL on invalid index or error
- */
-struct xtnt_node *xtnt_list_get(
-        struct xtnt_node_set *list,
-        xtnt_uint_t index)
-{
-    struct xtnt_node *got = NULL;
-    xtnt_uint_t dir = 0;
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    if (list->count > index) {
-        // Array has index
-        if (index < (list->count >> 1)) {
-            // Start from head of list
-            got = list->link[XTNT_NODE_HEAD];
-            dir = XTNT_NODE_TAIL;
-        } else {
-            // Start from tail of list
-            got = list->link[XTNT_NODE_TAIL];
-            dir = XTNT_NODE_HEAD;
-            index = list->count - (index + 1);
-        }
-        for (xtnt_uint_t idx = 0; idx < index; idx++) {
-            got = got->link[dir];
-        }
-    }
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-    }
-    return got;
+    return res;
 }
 
 /**
@@ -245,31 +239,33 @@ struct xtnt_node *xtnt_list_get(
  *
  * @param[in] list The Node Set to read through
  * @param[in] key The key to match
+ * @param[out] found Reference to matching Node or NULL
  * @return node on match or NULL
  */
-struct xtnt_node *xtnt_list_search(
-        struct xtnt_node_set *list,
-        xtnt_uint_t key)
+xtnt_status_t
+xtnt_list_search(
+    struct xtnt_node_set *list,
+    xtnt_uint_t key,
+    struct xtnt_node **found)
 {
-    struct xtnt_node *found = NULL;
-    struct xtnt_node *test = NULL;
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    test = list->link[XTNT_NODE_HEAD];
-    do {
-        if (test->key == key) {
-            found = test;
-            break;
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        *found = list->link[XTNT_NODE_HEAD];
+        do {
+            if (*found == NULL || (*found)->key == key) {
+                break;
+            }
+        } while ((*found = (*found)->link[XTNT_NODE_TAIL]));
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
         }
-    } while (test->link[XTNT_NODE_TAIL] != NULL);
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    return found;
+    return res;
 }
 
 /**
@@ -277,6 +273,7 @@ struct xtnt_node *xtnt_list_search(
  *
  * @param[in] list The Node Set to read through
  * @param[in] test_fn The test function to call on each node
+ * @param[in] ctx Context passed into the search function
  * @return node on match or NULL
  *
  * @remark The test should return 0 on match ( no difference ) or non-zero
@@ -285,30 +282,33 @@ struct xtnt_node *xtnt_list_search(
  * @code
  * xtnt_uint_t callback(void *ctx, struct xtnt_node *node);
  * @endcode
+ *
+ * @todo Implement tests for xtnt_list_search_fn
  */
-struct xtnt_node *xtnt_list_search_fn(
-        struct xtnt_node_set *list,
-        void *test_fn,
-        void *ctx)
+xtnt_status_t
+xtnt_list_search_fn(
+    struct xtnt_node_set *list,
+    void *test_fn,
+    void *ctx,
+    struct xtnt_node **found)
 {
-    struct xtnt_node *found = NULL;
-    struct xtnt_node *testing = NULL;
+    xtnt_status_t res = XTNT_EFAILURE;
     xtnt_uint_t (*test)(void *, struct xtnt_node *) = test_fn;
-    xtnt_int_t fail = pthread_mutex_lock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
-        return NULL;
-    }
-    testing = list->link[XTNT_NODE_HEAD];
-    do {
-        if (test(ctx, testing)) {
-            found = testing;
-            break;
+    if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
+        *found = list->link[XTNT_NODE_HEAD];
+        do {
+            if (*found == NULL || (test(ctx, *found) != 0)) {
+                break;
+            }
+        } while ((*found = (*found)->link[XTNT_NODE_TAIL]));
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
         }
-    } while (testing->link[XTNT_NODE_TAIL] != NULL);
-    fail = pthread_mutex_unlock(&(list->lock));
-    if (fail) {
-        XTNT_LOCK_SET_FAIL(list->state);
+        if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(list->state);
     }
-    return found;
+    return res;
 }

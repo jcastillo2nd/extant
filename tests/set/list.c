@@ -86,12 +86,17 @@ void setup(void)
 void teardown(void)
 {
     pthread_mutex_destroy(&sets[0].lock);
+    pthread_mutex_destroy(&sets[1].lock);
 }
 
 START_TEST (test_xtnt_list_delete_empty)
 {
+    xtnt_status_t res = XTNT_EFAILURE;
+    struct xtnt_node *deleted;
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node *deleted = xtnt_list_delete(&sets[1], idx);
+        res = xtnt_list_delete(&sets[1], idx, &deleted);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_delete to succeed, returned error %d instead", res);
         ck_assert_msg(deleted == NULL,
             "Expected deleted to be NULL but got node%u", deleted->key);
     }
@@ -100,8 +105,10 @@ END_TEST
 
 START_TEST (test_xtnt_list_delete_up)
 {
+    xtnt_status_t res = XTNT_EFAILURE;
+    struct xtnt_node *deleted;
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node *deleted = xtnt_list_delete(&sets[0], 0);
+        res = xtnt_list_delete(&sets[0], 0, &deleted);
         ck_assert_msg(deleted == &nodes[idx],
             "Expected deleted as node%u but got node%u", idx, deleted->key);
         ck_assert_msg(deleted->key == idx,
@@ -125,9 +132,11 @@ END_TEST
 
 START_TEST (test_xtnt_list_delete_down)
 {
+    xtnt_status_t res = XTNT_EFAILURE;
+    struct xtnt_node *deleted;
     for (xtnt_uint_t idx = 16; idx > 0; idx--) {
         xtnt_uint_t cidx = idx - 1;
-        struct xtnt_node *deleted = xtnt_list_delete(&sets[0], cidx);
+        res = xtnt_list_delete(&sets[0], cidx, &deleted);
         ck_assert_msg(deleted == &nodes[cidx],
             "Expected deleted as node%u but got node%u", cidx, deleted->key);
         ck_assert_msg(deleted->key == cidx,
@@ -151,7 +160,9 @@ END_TEST
 
 START_TEST (test_xtnt_list_delete_node7)
 {
-    struct xtnt_node *deleted = xtnt_list_delete(&sets[0], 7);
+    xtnt_status_t res = XTNT_EFAILURE;
+    struct xtnt_node *deleted;
+    res = xtnt_list_delete(&sets[0], 7, &deleted);
     ck_assert_msg(deleted == &nodes[7],
         "Expected node7 but was not node7");
     ck_assert_msg(deleted->key == 7,
@@ -167,7 +178,9 @@ END_TEST
 
 START_TEST (test_xtnt_list_delete_node8)
 {
-    struct xtnt_node *deleted = xtnt_list_delete(&sets[0], 8);
+    xtnt_status_t res = XTNT_EFAILURE;
+    struct xtnt_node *deleted;
+    res = xtnt_list_delete(&sets[0], 8, &deleted);
     ck_assert_msg(deleted == &nodes[8],
         "Expected node8 but was not node8");
     ck_assert_msg(deleted->key == 8,
@@ -184,12 +197,9 @@ END_TEST
 START_TEST (test_xtnt_list_insert_full)
 {
     for (xtnt_uint_t idx=0; idx < 16; idx++) {
-        xtnt_uint_t nkey = idx + 16;
-        struct xtnt_node *inserted = xtnt_list_insert(&sets[0], &in_nodes[idx]);
-        ck_assert_msg(inserted == &in_nodes[idx],
-            "Expected node%u but got node%u", idx, inserted->key);
-        ck_assert_msg(inserted->key == nkey,
-            "Expected node%u with key %u, but got node.key=%u", idx, nkey, inserted->key);
+        xtnt_status_t res = xtnt_list_insert(&sets[0], &in_nodes[idx]);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_insert to succeed, but returned %d", res);
         ck_assert_msg(sets[0].count == (idx + 17),
             "Expected set.count of %u, but got set.count=%u", (idx + 17), sets[0].count);
         ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &in_nodes[idx],
@@ -203,12 +213,9 @@ END_TEST
 START_TEST (test_xtnt_list_insert_nodes)
 {
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        xtnt_uint_t key = idx + 16;
-        struct xtnt_node *inserted = xtnt_list_insert(&sets[1], &in_nodes[idx]);
-        ck_assert_msg(inserted == &in_nodes[idx],
-            "Expected node%u but got node%u", idx, inserted->key);
-        ck_assert_msg(inserted->key == key,
-            "Expected node%u with key %u, but got node.key=%u", idx, key, inserted->key);
+        xtnt_status_t res = xtnt_list_insert(&sets[1], &in_nodes[idx]);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_insert to succeed, but returned %d", res);
         ck_assert_msg(sets[1].count == (idx + 1),
             "Expected set.count of %u, but got set.count=%u", (idx + 1), sets[1].count);
         ck_assert_msg(sets[1].link[XTNT_NODE_HEAD] == &in_nodes[idx],
@@ -222,7 +229,10 @@ END_TEST
 START_TEST (test_xtnt_list_replace_empty)
 {
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node* replaced = xtnt_list_replace(&sets[1], &in_nodes[idx], idx);
+        struct xtnt_node *replaced;
+        xtnt_status_t res = xtnt_list_replace(&sets[1], &in_nodes[idx], idx, &replaced);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_replaced to succeed, but returned %d", res);
         ck_assert_msg(replaced == NULL,
             "Expected replaced to be NULL, but got node%u", replaced->key);
         ck_assert_msg(sets[1].count == 0,
@@ -238,7 +248,10 @@ END_TEST
 START_TEST (test_xtnt_list_replace_nodes)
 {
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node* replaced = xtnt_list_replace(&sets[0], &in_nodes[idx], idx);
+        struct xtnt_node* replaced;
+        xtnt_status_t res = xtnt_list_replace(&sets[0], &in_nodes[idx], idx, &replaced);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_replaced to succeed, but returned %d", res);
         ck_assert_msg(replaced == &nodes[idx],
             "Expected found to be node%u, but got node%u", idx, replaced->key);
         ck_assert_msg(sets[0].count == 16,
@@ -261,7 +274,10 @@ END_TEST
 START_TEST (test_xtnt_list_get_empty)
 {
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node* found = xtnt_list_get(&sets[1], idx);
+        struct xtnt_node *found;
+        xtnt_status_t res = xtnt_list_get(&sets[1], idx, &found);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_get on empty to succeed, but returned %d", res);
         ck_assert_msg(found == NULL,
             "Expected found to be NULL, but got node%u", found->key);
         ck_assert_msg(sets[1].count == 0,
@@ -277,7 +293,10 @@ END_TEST
 START_TEST (test_xtnt_list_get_nodes)
 {
     for (xtnt_uint_t idx = 0; idx < 16; idx++) {
-        struct xtnt_node* found = xtnt_list_get(&sets[0], idx);
+        struct xtnt_node* found;
+        xtnt_status_t res = xtnt_list_get(&sets[0], idx, &found);
+        ck_assert_msg(res == XTNT_ESUCCESS,
+            "Expected xtnt_list_get to succeed, but returned %d", res);
         ck_assert_msg(found == &nodes[idx],
             "Expected found to be node%u, but got node%u", idx, found->key);
         ck_assert_msg(sets[0].count == 16,
@@ -287,6 +306,39 @@ START_TEST (test_xtnt_list_get_nodes)
         ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
             "Expected set tail as node15 but got node%u", sets[0].link[XTNT_NODE_TAIL]->key);
     }
+}
+END_TEST
+
+START_TEST (test_xtnt_list_search_empty)
+{
+    struct xtnt_node *found;
+    xtnt_status_t res = xtnt_list_search(&sets[1], 5, &found);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_list_search to succeed, but returned %d", res);
+    ck_assert_msg(found == NULL,
+        "Expected found to be NULL, but got node->key %d", found->key);
+}
+END_TEST
+
+START_TEST (test_xtnt_list_search_full)
+{
+    struct xtnt_node *found;
+    xtnt_status_t res = xtnt_list_search(&sets[0], 5, &found);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_list_search to succeed, but returned %d", res);
+    ck_assert_msg(found->key == 5,
+        "Expected found to have key 5, but got %d", found->key);
+}
+END_TEST
+
+START_TEST (test_xtnt_list_search_full_beyond)
+{
+    struct xtnt_node *found;
+    xtnt_status_t res = xtnt_list_search(&sets[0], 19, &found);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_list_search to succeed, but returned %d", res);
+    ck_assert_msg(found == NULL,
+        "Expected found to be NULL, but got node with key %d", found->key);
 }
 END_TEST
 
@@ -314,6 +366,8 @@ Suite * xtnt_list_suite(void)
 
     tcase_add_test(tc_xtnt_list, test_xtnt_list_get_empty);
     tcase_add_test(tc_xtnt_list, test_xtnt_list_get_nodes);
+
+    tcase_add_test(tc_xtnt_list, test_xtnt_list_search_empty);
 
     suite_add_tcase(s, tc_xtnt_list);
 

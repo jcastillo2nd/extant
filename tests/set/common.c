@@ -42,6 +42,8 @@ void setup(void)
 
     node2.key = 5;
     node2.value = &value;
+    node2.state = XTNT_ESUCCESS;
+    node2.quirk = XTNT_ESUCCESS;
     node2.link[XTNT_NODE_HEAD] = \
     node2.link[XTNT_NODE_MIDDLE] = \
     node2.link[XTNT_NODE_TAIL] = NULL;
@@ -62,13 +64,15 @@ void teardown(void)
 START_TEST (test_xtnt_node_initialize)
 {
     struct xtnt_node *res = &node1;
-    xtnt_int_t test = xtnt_node_initialize(res, 5, &value);
+    xtnt_int_t test = xtnt_node_initialize(res, 5, 0, &value);
     ck_assert_msg(test == 0,
         "Initialization failed with %d", test);
     ck_assert_msg(res->key == 5,
         "Expected node of key 5 but got %u", res->key);
     ck_assert_msg(res->value == &value,
         "Expected node value of 5, but got %u", (xtnt_uint_t *) res->value);
+    ck_assert_msg(res->quirk == XTNT_ESUCCESS,
+        "Expected quirk value of %d, but got %d", XTNT_ESUCCESS, res->quirk);
     ck_assert_msg(res->link[XTNT_NODE_HEAD] == NULL,
         "Expected node head as NULL, but was not NULL");
     ck_assert_msg(res->link[XTNT_NODE_MIDDLE] == NULL,
@@ -80,20 +84,10 @@ END_TEST
 
 START_TEST (test_xtnt_node_uninitialize)
 {
-    struct xtnt_node *res = &node2;
-    xtnt_int_t test = xtnt_node_uninitialize(res);
-    ck_assert_msg(test == 0,
-        "Uninitialization failed with %d", test);
-    ck_assert_msg(node2.value == NULL,
-        "Expected node value as NULL, but was not NULL");
-    ck_assert_msg(node2.link[XTNT_NODE_HEAD] == NULL,
-        "Expected node head as NULL, but was not NULL");
-    ck_assert_msg(node2.link[XTNT_NODE_MIDDLE] == NULL,
-        "Expected node middle as NULL, but was not NULL");
-    ck_assert_msg(node2.link[XTNT_NODE_TAIL] == NULL,
-        "Expected node tail as NULL, but was not NULL");
-    ck_assert_msg(node2.key == 0,
-        "Expected empty key, but got %u", node2.key);
+    struct xtnt_node *node = &node2;
+    xtnt_status_t res = xtnt_node_uninitialize(node);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Uninitialization failed with %d", res);
 }
 END_TEST
 
@@ -119,19 +113,9 @@ END_TEST
 START_TEST (test_xtnt_set_uninitialize)
 {
     struct xtnt_node_set *set = &set2;
-    xtnt_int_t test = xtnt_node_set_uninitialize(set);
-    ck_assert_msg(test == 0,
-        "Uninitialization failed with %d", test);
-    ck_assert_msg(set->link[XTNT_NODE_HEAD] == NULL,
-        "Expected set head as NULL, but was not NULL");
-    ck_assert_msg(set->link[XTNT_NODE_MIDDLE] == NULL,
-        "Expected set middle as NULL, but was not NULL");
-    ck_assert_msg(set->link[XTNT_NODE_TAIL] == NULL,
-        "Expected set tail as NULL, but was not NULL");
-    ck_assert_msg(set->count == 0,
-        "Expected set count as 0, but got %u", set->count);
-    ck_assert_msg(set->state == 0,
-        "Expected set state as 0, but got %u", set->state);
+    xtnt_status_t res = xtnt_node_set_uninitialize(set);
+    ck_assert_msg(res == XTNT_ESUCCESS,
+        "Expected xtnt_node_set_uninitialize to succeed");
 }
 END_TEST
 

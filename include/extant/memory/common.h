@@ -27,29 +27,21 @@ SOFTWARE.
 ===============================================================================
 */
 
-#include <extant/extant.h>
+#ifndef _XTNT_MEMORY_COMMON_H_
+#define _XTNT_MEMORY_COMMON_H_
 
-/**
- * @brief Generate a hash from a key
- *
- * Generate a unique integer evaluating the bytes of a key. There is collision
- * like MD5 sums but for keys < 128 bytes long this works well.
- *
- * @param[in] key Value to be hashed
- * @return xtnt_uint_t hash value
- */
-xtnt_uint_t xtnt_hash(void *key)
+#include <extant/error.h>
+
+#include <extant/set/common.h>
+
+struct xtnt_memory_object
 {
-    const char *s = (const char*) key;
-    xtnt_uint_t sum = 0;
-    xtnt_int_t interval = 0;
-    for (xtnt_int_t idx = 0; s[idx] != 0; idx++) {
-        if (interval == 1) {
-            sum <<= sizeof(char);
-            interval--;
-        }
-        sum ^= (xtnt_int_t) s[idx];
-        interval++;
-    }
-    return sum;
-}
+    void *base;
+    size_t size;
+    xtnt_uint_t state;
+    struct xtnt_node_set set;
+    pthread_mutex_t lock;
+};
+
+#endif /* _XTNT_MEMORY_COMMON_H_ */
+
