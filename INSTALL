@@ -2,18 +2,45 @@
 
 To install from release, extract the downloaded release file, call configure, make and make install.
 
-    > tar xf libextant-0.1.tar.gz
-    > cd libextant-0.1
+    > tar xf libextant-0.2.tar.gz
+    > cd libextant-0.2
     > cd build
     > ../configure
     > make
     > make install
 
+## Optionally run tests ##
+
+
+
+    > tar xf libextant-0.2.tar.gz
+    > cd libextant-0.2
+    > cd build
+    > ../configure
+    > make
+    > make check && make install
+
+
 ## Optionally generate docs ##
 
 If you have Doxygen on the system, the docs can be generated with the docs target:
 
-    > make docs
+    > tar xf libextant-0.2.tar.gz
+    > cd libextant-0.2
+    > cd build
+    > ../configure
+    > make
+    > make check && make install
+    > make html
+
+Installation will by default build out the docs
+
+    > tar xf libextant-0.2.tar.gz
+    > cd libextant-0.2
+    > cd build
+    > ../configure
+    > make
+    > make check && make install && make install-html
 
 # Installation from source #
 
@@ -26,5 +53,5 @@ If installing from source, the autotools and libtool development environment is 
     > ../configure
     > make
     > make check
-    > make docs
     > make install
+    > make install-html
