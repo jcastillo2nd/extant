@@ -27,49 +27,39 @@ SOFTWARE.
 ===============================================================================
 */
 
-#ifndef _XTNT_SET_TREE_H_
-#define _XTNT_SET_TREE_H_
+#ifndef _XTNT_SET_AVL_TREE_H_
+#define _XTNT_SET_AVL_TREE_H_
 
-#include <extant/set/common.h>
+#include <extant/set/tree.h>
 
-#ifdef XTNT_DEFAULT_TREE_MAX_HEIGHT
-#define XTNT_TREE_MAX_HEIGHT (XTNT_DEFAULT_TREE_MAX_HEIGHT)
-#else
-#define XTNT_TREE_MAX_HEIGHT (16)
-#endif /* ifndef XTNT_DEFAULT_TREE_MAX_HEIGHT */
-
-#define XTNT_TREE_RED (0)
-#define XTNT_TREE_BLACK (1)
-
-#define XTNT_TREE_UNINITIALIZED (0)
-#define XTNT_TREE_INITIALIZED (1)
-#define XTNT_TREE_NOROOT (1)
-#define XTNT_TREE_ROOT (3)
-
-struct xtnt_node *
-xtnt_rbtree_delete(
+xtnt_status_t
+xtnt_avltree_delete(
     struct xtnt_node_set *tree,
-	    xtnt_uint_t key);
+    xtnt_uint_t key,
+    struct xtnt_node **deleted);
 
-struct xtnt_node *
-xtnt_rbtree_insert(
+xtnt_status_t
+xtnt_avltree_insert(
     struct xtnt_node_set *tree,
     struct xtnt_node *node);
 
-struct xtnt_node *
-xtnt_rbtree_replace(
+xtnt_status_t
+xtnt_avltree_replace(
     struct xtnt_node_set *tree,
-    struct xtnt_node *node);
+    struct xtnt_node *node,
+    struct xtnt_node **replaced);
 
-struct xtnt_node *
-xtnt_rbtree_search(
+xtnt_status_t
+xtnt_avltree_search(
     struct xtnt_node_set *tree,
-    xtnt_uint_t key);
+    xtnt_uint_t key,
+    struct xtnt_node **found);
 
-struct xtnt_node *
-xtnt_rbtree_search_fn(
+xtnt_status_t
+xtnt_avltree_search_fn(
     struct xtnt_node_set *tree,
     void *test_fn,
-    void *ctx);
+    void *ctx,
+    struct xtnt_node **found);
 
-#endif /* ifndef _XTNT_SET_TREE_H_ */
+#endif /* ifndef _XTNT_SET_AVL_TREE_H_ */

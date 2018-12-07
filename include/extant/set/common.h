@@ -30,9 +30,7 @@ SOFTWARE.
 #ifndef _XTNT_SET_COMMON_H_
 #define _XTNT_SET_COMMON_H_
 
-#ifndef _XTNT_ERROR_H_
 #include <extant/error.h>
-#endif /* _XTNT_ERROR_H_ */
 
 #define XTNT_NODE_HEAD 0
 #define XTNT_NODE_LEFT 0
