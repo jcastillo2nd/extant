@@ -46,10 +46,10 @@ xtnt_array_create(
     struct xtnt_node_set **array)
 {
     xtnt_status_t res = XTNT_ESUCCESS;
-    struct xtnt_node_set *marray = malloc(sizeof(struct xtnt_node_set));
-    struct xtnt_node *narray = malloc(sizeof(struct xtnt_node*) * count);
+    struct xtnt_node_set *marray = malloc(sizeof(struct xtnt_node_set) + (sizeof(struct xtnt_node) * count));
+    struct xtnt_node *narray = (struct xtnt_node *) (marray + sizeof(struct xtnt_node_set));
 
-    if (marray != NULL && narray != NULL) {
+    if (marray != NULL) {
         if ((res = xtnt_node_set_initialize(marray)) == XTNT_ESUCCESS) {
             if ((res = pthread_mutex_lock(&(marray->lock))) == XTNT_ESUCCESS) {
                 marray->link[XTNT_NODE_HEAD] = narray;
@@ -63,7 +63,6 @@ xtnt_array_create(
                 XTNT_LOCK_SET_LOCK_FAIL(marray->state);
             }
         } else {
-            free(narray);
             free(marray);
             *array = NULL;
         }
@@ -98,7 +97,7 @@ xtnt_array_delete(
     }
     if (index < array->count) {
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
-            node = &((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
+            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
             ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] = NULL;
         }
     }
@@ -127,7 +126,6 @@ xtnt_array_destroy(
     xtnt_status_t status = XTNT_EFAILURE;
     struct xtnt_node_set *a = *array;
     if ((status = pthread_mutex_lock(&(a->lock))) == XTNT_ESUCCESS) {
-        free(a->link[XTNT_NODE_HEAD]);
         if ((status = pthread_mutex_unlock(&(a->lock))) == XTNT_ESUCCESS){
             free(a);
             *array = NULL;
@@ -163,7 +161,7 @@ xtnt_array_get(
     }
     if (index < array->count) {
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
-             node = &((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
+             *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
         }
     }
     fail = pthread_mutex_unlock(&(array->lock));
@@ -232,7 +230,7 @@ xtnt_array_search(
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx] != NULL &&
             ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx]->key == key) {
-            node = &((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
+            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
             break;
         }
     }
@@ -270,7 +268,7 @@ xtnt_array_search_fn(
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
         if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx] != NULL &&
             test(ctx, ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx])) {
-            node = &((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
+            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
             break;
         }
     }

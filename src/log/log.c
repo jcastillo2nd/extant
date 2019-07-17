@@ -96,35 +96,38 @@ xtnt_logger_create(
     struct xtnt_logger **logger)
 {
     xtnt_status_t res = XTNT_ESUCCESS;
-    struct xtnt_logger *mlogger = malloc(sizeof(struct xtnt_logger));
-    if (mlogger != NULL) {
-        if ((res = xtnt_logger_initialize(mlogger)) == XTNT_ESUCCESS) {
-            if ((res = pthread_mutex_lock(&(mlogger->lock))) == XTNT_ZERO) {
-                mlogger->log = log;
-                mlogger->filename = (char *) filename;
-                if (mlogger->log == NULL){
-                    if(mlogger->filename != NULL){
-                        mlogger->log = fopen(filename, "a+");
-                        if (mlogger->log == NULL) {
-                            res = errno;
-                        }
-                    } else {
-                        res = EINVAL;
-                    }
-                }
-                if ((res = pthread_mutex_unlock(&(mlogger->lock)) != XTNT_ZERO)){
-                    XTNT_LOCK_SET_UNLOCK_FAIL(mlogger->state);
-                }
-            } else {
-                XTNT_LOCK_SET_LOCK_FAIL(mlogger->state);
+    struct xtnt_logger *mlogger = NULL;
+    if (log == NULL) {
+        if (filename != NULL) {
+            log = fopen(filename, "a+");
+            if (log == NULL) {
+                res = errno;
             }
         } else {
-            res = xtnt_logger_uninitialize(mlogger);
-            free(mlogger);
-            mlogger = NULL;
+            res = EINVAL;
         }
-    } else {
-        res = errno;
+    }
+    if (res == XTNT_ESUCCESS) {
+        mlogger = malloc(sizeof(struct xtnt_logger));
+        if (mlogger != NULL) {
+            if ((res = xtnt_logger_initialize(mlogger)) == XTNT_ESUCCESS) {
+                if ((res = pthread_mutex_lock(&(mlogger->lock))) == XTNT_ZERO) {
+                    mlogger->log = log;
+                    mlogger->filename = (char *) filename;
+                    if ((res = pthread_mutex_unlock(&(mlogger->lock)) != XTNT_ZERO)){
+                        XTNT_LOCK_SET_UNLOCK_FAIL(mlogger->state);
+                    }
+                } else {
+                    XTNT_LOCK_SET_LOCK_FAIL(mlogger->state);
+                }
+            } else {
+                res = xtnt_logger_uninitialize(mlogger);
+                free(mlogger);
+                mlogger = NULL;
+            }
+        } else {
+            res = errno;
+        }
     }
     *logger = mlogger;
     return res;
@@ -142,7 +145,7 @@ xtnt_logger_destroy(
 {
     xtnt_status_t res = XTNT_EFAILURE;
     res = xtnt_logger_uninitialize(*logger);
-    free(logger);
+    free(*logger);
     *logger = NULL;
     return res;
 }
@@ -277,7 +280,12 @@ xtnt_logger_process(
         if (state == XTNT_LOGGER_PENDING_EXIT) {
             XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_COMPLETED_EXIT);
         } else {
-            res = xtnt_queue_pop(&(logger->queue), &node);
+            if ((res = xtnt_queue_pop(&(logger->queue), &node)) != XTNT_ESUCCESS ) {
+                printf("xtnt error:: Logger queue state invalid : xtnt_queue_pop returned %i", res);
+/**
+ * @todo Catch queue state and try to recover
+ */
+            }
         }
 
         if (node == NULL || !(iter)) {

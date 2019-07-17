@@ -47,7 +47,6 @@ xtnt_stack_peek(
     if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
         if (stack->link[XTNT_NODE_HEAD] != NULL) {
             *node = stack->link[XTNT_NODE_HEAD];
-            res = XTNT_ESUCCESS;
         }
         if ((res = pthread_mutex_unlock(&(stack->lock))) != XTNT_ESUCCESS) {
             XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);

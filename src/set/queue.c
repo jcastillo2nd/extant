@@ -47,7 +47,6 @@ xtnt_queue_peek(
     if ((res = pthread_mutex_lock(&(queue->lock))) == XTNT_ESUCCESS) {
         if (queue->link[XTNT_NODE_TAIL] != NULL) {
             *node = queue->link[XTNT_NODE_TAIL];
-            res = XTNT_ESUCCESS;
         }
         if ((res = pthread_mutex_unlock(&(queue->lock))) != XTNT_ESUCCESS) {
             XTNT_LOCK_SET_UNLOCK_FAIL(queue->state);
@@ -75,9 +74,8 @@ xtnt_queue_pop(
     if ((res = pthread_mutex_lock(&(queue->lock))) == XTNT_ESUCCESS) {
         *node = queue->link[XTNT_NODE_TAIL];
         if (*node != NULL) {
-            // Use of size_t lead to any bugs?
-            if ((size_t) queue->link[XTNT_NODE_HEAD] ^
-                (size_t) queue->link[XTNT_NODE_TAIL]) {
+            if ((uintptr_t) queue->link[XTNT_NODE_HEAD] ^
+                (uintptr_t) queue->link[XTNT_NODE_TAIL]) {
                 (*node)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
                 queue->link[XTNT_NODE_TAIL] = (*node)->link[XTNT_NODE_HEAD];
             } else {
