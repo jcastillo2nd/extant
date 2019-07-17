@@ -141,6 +141,7 @@ AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([tests/dso/Makefile])
 AC_CONFIG_FILES([tests/log/Makefile])
 AC_CONFIG_FILES([tests/set/Makefile])
+AC_CONFIG_FILES([tests/set/tree/Makefile])
 
 # Program Docs
 AC_CONFIG_FILES([doc/Makefile])
