@@ -23,3 +23,5 @@ list_tests_SOURCES = list.c
 queue_tests_SOURCES = queue.c
 
 stack_tests_SOURCES = stack.c
+
+SUBDIRS = tree
