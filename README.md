@@ -53,11 +53,11 @@ With both libcheck and Doxygen present on the system, the following can be run
 to unpack, configure, build and conditionally install ( default under
 `/usr/local` ) the software and documentation if the unit tests pass:
 
-  > tar xzf extant-0.1.tar.gz
-  > cd extant-0.1
-  > ./configure
-  > make
-  > make check && make install && make install-html
+    > tar xzf extant-0.1.tar.gz
+    > cd extant-0.1
+    > ./configure
+    > make
+    > make check && make install && make install-html
 
 ### Options ###
 
