@@ -33,7 +33,7 @@ SOFTWARE.
  * @brief Generate a hash from a key
  *
  * Generate a unique integer evaluating the bytes of a key. There is collision
- * like MD5 sums but for keys < 128 bytes long this works well.
+ * but for null terminated string keys < 128 bytes long this works well.
  *
  * @param[in] key Value to be hashed
  * @return xtnt_uint_t hash value
@@ -42,14 +42,11 @@ xtnt_uint_t xtnt_hash(void *key)
 {
     const char *s = (const char*) key;
     xtnt_uint_t sum = 0;
-    xtnt_int_t interval = 0;
     for (xtnt_int_t idx = 0; s[idx] != 0; idx++) {
-        if (interval == 1) {
+        if (idx & 1) {
             sum <<= sizeof(char);
-            interval--;
         }
         sum ^= (xtnt_int_t) s[idx];
-        interval++;
     }
     return sum;
 }
