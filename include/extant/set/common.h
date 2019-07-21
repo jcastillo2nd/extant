@@ -116,13 +116,13 @@ struct xtnt_node_set_fn {
     xtnt_status_t (*root)(struct xtnt_node **root);
     xtnt_status_t (*state)(struct xtnt_node_set_state **state);
 /* Modifiers */
-    xtnt_status_t (*insert)(xtnt_node *node);
-    xtnt_status_t (*insert_at)(xtnt_uint_t index, xtnt_node *node, xtnt_node **replaced);
-    xtnt_status_t (*push)(xtnt_node *node);
+    xtnt_status_t (*insert)(struct xtnt_node *node);
+    xtnt_status_t (*insert_at)(xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced);
+    xtnt_status_t (*push)(struct xtnt_node *node);
 
-    xtnt_status_t (*remove)(xtnt_node *node);
-    xtnt_status_t (*remove_at)(xtnt_uint_t index, xtnt_node **removed);
-    xtnt_status_t (*pop)(xtnt_node *node);
+    xtnt_status_t (*remove)(struct xtnt_node *node);
+    xtnt_status_t (*remove_at)(xtnt_uint_t index, struct xtnt_node **removed);
+    xtnt_status_t (*pop)(struct xtnt_node *node);
 
     xtnt_status_t (*sort)();
     xtnt_status_t (*sort_reverse)();
