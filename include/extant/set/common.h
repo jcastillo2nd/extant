@@ -91,7 +91,10 @@ struct xtnt_node_set_state {
     xtnt_uint_t state;
 };
 
+struct xtnt_node_set_fn;
+
 struct xtnt_node_set {
+    struct xtnt_node_set_fn *fn_table;
     struct xtnt_node *link[3];
     xtnt_uint_t size;
     xtnt_uint_t count;
