@@ -89,16 +89,15 @@ struct xtnt_node_set_state {
     xtnt_uint_t size;
     xtnt_uint_t count;
     xtnt_uint_t state;
-}
+};
 
 struct xtnt_node_set {
     struct xtnt_node *link[3];
     xtnt_uint_t size;
     xtnt_uint_t count;
     xtnt_uint_t state;
-    xtnt_node_set_fn fn;
     pthread_mutex_t lock;
-}
+};
 
 /* See https://stackoverflow.com/questions/17621544/dynamic-method-dispatching-in-c/17622474#17622474 */
 
