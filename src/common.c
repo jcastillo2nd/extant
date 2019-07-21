@@ -43,7 +43,7 @@ xtnt_uint_t xtnt_hash(void *key)
     const char *s = (const char*) key;
     xtnt_uint_t sum = 0;
     for (xtnt_int_t idx = 0; s[idx] != 0; idx++) {
-        if !(idx & 1) {
+        if (idx && 1) {
             sum <<= sizeof(char);
         }
         sum ^= (xtnt_int_t) s[idx];
