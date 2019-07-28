@@ -107,8 +107,7 @@
 /** @struct xtnt_node_set_if
  * Function interface for Node Set
  *
- * @fn xtnt_status_t (*xtnt_node_set_if::index)(struct xtnt_node_set *set, xtnt_int_t index, struct xtnt_node **found)
- * @relates xtnt_node_set_if
+ * @fn xtnt_status_t (* xtnt_node_set_if::index)(struct xtnt_node_set *set, xtnt_int_t index, struct xtnt_node **found)
  * @see xtnt_set_index()
  * Return node at index of Node Set
  * @note For non-indexed Node Sets ( e.g. trees ) this may operate the same as search.
@@ -117,8 +116,7 @@
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
- * @fn xtnt_status_t (*xtnt_node_set_if::search)(struct xtnt_node_set *set, xtnt_uint_t key, struct xtnt_node **found)
- * @relates xtnt_node_set_if
+ * @fn xtnt_status_t (* xtnt_node_set_if::search)(struct xtnt_node_set *set, xtnt_uint_t key, struct xtnt_node **found)
  * @see xtnt_set_search()
  * Search Node Set for Node with matching key
  * @param set A Node Set to operate on
@@ -126,8 +124,7 @@
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
- * @fn xtnt_status_t (*xtnt_node_set_if::search_fn)(struct xtnt_node_set *set, void *fn, void *needle, struct xtnt_node **found)
- * @relates xtnt_node_set_if
+ * @fn xtnt_status_t (* xtnt_node_set_if::search_fn)(struct xtnt_node_set *set, void *fn, void *needle, struct xtnt_node **found)
  * @see xtnt_set_search_fn()
  * Search Node Set for Node with search function fn, that accepts needle criteria
  * @param set A Node Set to operate on
