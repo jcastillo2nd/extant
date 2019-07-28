@@ -36,12 +36,11 @@ AS_IF([test "x${DOXYGEN}" != "xno"],
       [AM_CONDITIONAL([HAVE_DOXYGEN], [true])],
       [AC_MSG_WARN([Doxygen not found. Docs not available.])])
 
-# Dot check if DOXYGEN
-AS_IF([test "x${DOXYGEN}" != "xno"],
-      [AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
-       AS_IF([test "x${GRAPHVIZ_DOT}" != "xno"],
-             [AM_CONDITIONAL([HAVE_GRAPHVIZ_DOT], [true])],
-             [AC_MSG_WARN([Graphviz dot tool not found. Call graphs in docs not available.])])])
+# Dot check
+AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
+AS_IF([test "x${GRAPHVIZ_DOT}" != "xno"],
+      [AM_CONDITIONAL([HAVE_GRAPHVIZ_DOT], [test "x${DOXYGEN}" != "xno"])],
+      [AC_MSG_WARN([Graphviz dot tool not found. Call graphs in docs not available.])])
 
 # pthread check
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
