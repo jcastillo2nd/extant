@@ -40,47 +40,12 @@ SOFTWARE.
 #define XTNT_NODE_TAIL 2
 #define XTNT_NODE_RIGHT 2
 
-/**
- * @struct xtnt_node
- * Operand of xtnt_node_set operations.
- * Attributes marked public can be accessed by any thread. All other attributes require a lock.
- */
 struct xtnt_node {
-/**
- * @public
- * Pointer to any value the node holds. 
- * @attention This property should be treated as immutable.
- */
     void *value;
-/**
- * @private
- * Array of pointers to relative nodes.
- * @warning The pointers are managed by the set operations and may or may not
- * have valid values.
- */
     struct xtnt_node *link[3];
-/** 
- * @private
- * An identifier for the node
- */
     xtnt_uint_t key;
-/**
- * @private
- * The state of the node after operations
- */
     xtnt_uint_t state;
-/**
- * @public
- * An attribute of the node.
- * @attention This property should be treated as immutable.
- * @note This may be used in place of a namespace, or for qualifying the node
- * as a particular type when referencing `xtnt_node::value`.
- */
     xtnt_uint_t quirk;
-/**
- * @public
- * Lock used to operate on any members
- */
     pthread_mutex_t lock;
 };
 
@@ -91,10 +56,10 @@ struct xtnt_node_set_state {
     xtnt_uint_t state;
 };
 
-struct xtnt_node_set_fn;
+struct xtnt_node_set_if; // Forward Declaration
 
 struct xtnt_node_set {
-    struct xtnt_node_set_fn *fn_table;
+    const struct xtnt_node_set_if *fn;
     struct xtnt_node *link[3];
     xtnt_uint_t size;
     xtnt_uint_t count;
@@ -104,34 +69,142 @@ struct xtnt_node_set {
 
 /* See https://stackoverflow.com/questions/17621544/dynamic-method-dispatching-in-c/17622474#17622474 */
 
-struct xtnt_node_set_fn {
+struct xtnt_node_set_if {
 /* Accessors */
     xtnt_status_t (*index)(struct xtnt_node_set *set, xtnt_int_t index, struct xtnt_node **found);
-    xtnt_status_t (*search)(xtnt_uint_t, struct xtnt_node **found);
-    xtnt_status_t (*search_fn)(void *fn, struct xtnt_node **found);
-    xtnt_status_t (*first)(struct xtnt_node **first);
-    xtnt_status_t (*last)(struct xtnt_node **last);
-    xtnt_status_t (*peek)(struct xtnt_node **peek);
-    xtnt_status_t (*root)(struct xtnt_node **root);
-    xtnt_status_t (*state)(struct xtnt_node_set_state **state);
+    xtnt_status_t (*search)(struct xtnt_node_set *set, xtnt_uint_t key, struct xtnt_node **found);
+    xtnt_status_t (*search_fn)(struct xtnt_node_set *set, void *fn, void *needle, struct xtnt_node **found);
+    xtnt_status_t (*first)(struct xtnt_node_set *set, struct xtnt_node **first);
+    xtnt_status_t (*last)(struct xtnt_node_set *set, struct xtnt_node **last);
+    xtnt_status_t (*peek)(struct xtnt_node_set *set, struct xtnt_node **peek);
+    xtnt_status_t (*root)(struct xtnt_node_set *set, struct xtnt_node **root);
+    xtnt_status_t (*state)(struct xtnt_node_set *set, struct xtnt_node_set_state **state);
 /* Modifiers */
-    xtnt_status_t (*insert)(struct xtnt_node *node);
-    xtnt_status_t (*insert_at)(xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced);
-    xtnt_status_t (*push)(struct xtnt_node *node);
+    xtnt_status_t (*insert)(struct xtnt_node_set *set, struct xtnt_node *node);
+    xtnt_status_t (*insert_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced);
+    xtnt_status_t (*push)(struct xtnt_node_set *set, struct xtnt_node *node);
 
-    xtnt_status_t (*remove)(struct xtnt_node *node);
-    xtnt_status_t (*remove_at)(xtnt_uint_t index, struct xtnt_node **removed);
-    xtnt_status_t (*pop)(struct xtnt_node *node);
+    xtnt_status_t (*remove)(struct xtnt_node_set *set, struct xtnt_node *node);
+    xtnt_status_t (*remove_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node **removed);
+    xtnt_status_t (*pop)(struct xtnt_node_set *set, struct xtnt_node *node);
 
-    xtnt_status_t (*sort)();
-    xtnt_status_t (*sort_reverse)();
-    xtnt_status_t (*sort_fn)(void *fn);
+    xtnt_status_t (*sort)(struct xtnt_node_set *set);
+    xtnt_status_t (*sort_reverse)(struct xtnt_node_set *set);
+    xtnt_status_t (*sort_fn)(struct xtnt_node_set *set, void *fn);
 
-    xtnt_status_t (*grow)();
-    xtnt_status_t (*grow_eval)();
-    xtnt_status_t (*shrink)();
-    xtnt_status_t (*shrink_eval)();
+    xtnt_status_t (*grow)(struct xtnt_node_set *set);
+    xtnt_status_t (*grow_eval)(struct xtnt_node_set *set, size_t eval);
+    xtnt_status_t (*shrink)(struct xtnt_node_set *set);
+    xtnt_status_t (*shrink_eval)(struct xtnt_node_set *set, size_t eval);
 };
+
+inline xtnt_status_t
+xtnt_set_index(
+    struct xtnt_node_set *set,
+    xtnt_int_t index,
+    struct xtnt_node **found);
+
+inline xtnt_status_t
+xtnt_set_search(
+    struct xtnt_node_set *set,
+    xtnt_uint_t key,
+    struct xtnt_node **found);
+
+inline xtnt_status_t
+xtnt_set_search_fn(
+    struct xtnt_node_set *set,
+    void *fn,
+    void *needle,
+    struct xtnt_node **found);
+
+inline xtnt_status_t
+xtnt_set_first(
+    struct xtnt_node_set *set,
+    struct xtnt_node **first);
+
+inline xtnt_status_t
+xtnt_set_last(
+    struct xtnt_node_set *set,
+    struct xtnt_node **last);
+
+inline xtnt_status_t
+xtnt_set_peek(
+    struct xtnt_node_set *set,
+    struct xtnt_node **peek);
+
+inline xtnt_status_t
+xtnt_set_root(
+    struct xtnt_node_set *set,
+    struct xtnt_node **root);
+
+inline xtnt_status_t
+xtnt_set_state(
+    struct xtnt_node_set *set,
+    struct xtnt_node_set_state **state);
+
+inline xtnt_status_t
+xtnt_set_insert(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node);
+
+inline xtnt_status_t
+xtnt_set_insert_at(
+    struct xtnt_node_set *set,
+    xtnt_uint_t index,
+    struct xtnt_node *node,
+    struct xtnt_node **replaced);
+
+inline xtnt_status_t
+xtnt_set_push(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node);
+
+inline xtnt_status_t
+xtnt_set_remove(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node);
+
+xtnt_status_t
+inline xtnt_set_remove_at(
+    struct xtnt_node_set *set,
+    xtnt_uint_t index,
+    struct xtnt_node **removed);
+
+inline xtnt_status_t
+xtnt_set_pop(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node);
+
+inline xtnt_status_t
+xtnt_set_sort(
+    struct xtnt_node_set *set);
+
+inline xtnt_status_t
+xtnt_set_sort_reverse(
+    struct xtnt_node_set *set);
+
+inline xtnt_status_t
+xtnt_set_sort_fn(
+    struct xtnt_node_set *set,
+    void *fn);
+
+inline xtnt_status_t
+xtnt_set_grow(
+    struct xtnt_node_set *set);
+
+inline xtnt_status_t
+xtnt_set_grow_eval(
+    struct xtnt_node_set *set,
+    size_t eval);
+
+inline xtnt_status_t
+xtnt_set_shrink(
+    struct xtnt_node_set *set);
+
+inline xtnt_status_t
+xtnt_set_shrink_eval(
+    struct xtnt_node_set *set,
+    size_t eval);
 
 xtnt_status_t
 xtnt_node_initialize(

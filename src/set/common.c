@@ -184,3 +184,12 @@ xtnt_node_uninitialize(
     }
     return res;
 }
+
+xtnt_status_t
+xtnt_set_index(
+    struct xtnt_node_set *s,
+    xtnt_int_t index,
+    struct xtnt_node **found)
+{
+    return s->fn->index((struct xtnt_node_set_if*) s, index, found);
+}
