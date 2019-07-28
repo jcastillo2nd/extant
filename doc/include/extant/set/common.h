@@ -107,7 +107,7 @@
 /** @struct xtnt_node_set_if
  * Function interface for Node Set
  *
- * @fn xtnt_status_t (*index)(struct xtnt_node_set_if *set, xtnt_int_t index, struct xtnt_node **found)
+ * @fn xtnt_status_t (*index)(struct xtnt_node_set *set, xtnt_int_t index, struct xtnt_node **found)
  * Return node at index of Node Set
  * @note For non-indexed Node Sets ( e.g. trees ) this may operate the same as search.
  * @param set A Node Set to operate on
@@ -115,14 +115,14 @@
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
- * @fn xtnt_status_t (*search)(struct xtnt_node_set_if *set, xtnt_uint_t key, struct xtnt_node **found)
+ * @fn xtnt_status_t (*search)(struct xtnt_node_set *set, xtnt_uint_t key, struct xtnt_node **found)
  * Search Node Set for Node with matching key
  * @param set A Node Set to operate on
  * @param key The key to compare Nodes against
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
- * @fn xtnt_status_t (*search_fn)(struct xtnt_node_set_if *set, void *fn, void *needle, struct xtnt_node **found)
+ * @fn xtnt_status_t (*search_fn)(struct xtnt_node_set *set, void *fn, void *needle, struct xtnt_node **found)
  * Search Node Set for Node with search function fn, that accepts needle criteria
  * @param set A Node Set to operate on
  * @param fn A search function to run on each node
@@ -130,60 +130,64 @@
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
- * @fn xtnt_status_t (*first)(struct xtnt_node_set_if *set, struct xtnt_node **first)
+ * @fn xtnt_status_t (*first)(struct xtnt_node_set *set, struct xtnt_node **first)
  * Return first Node of Node Set
  * @note Definition varies based on Node Set implementation, e.g. Tree may return lowest key Node
  * @param set A Node Set to operate on
  * @param first[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
- * @fn xtnt_status_t (*last)(struct xtnt_node_set_if *set, struct xtnt_node **last)
+ * @fn xtnt_status_t (*last)(struct xtnt_node_set *set, struct xtnt_node **last)
  * Return last Node of Node Set
  * @note Definition varies based on Node Set implementation, e.g. Tree may return highest key Node
  * @param set A Node Set to operate on
  * @param last[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
- * @fn xtnt_status_t (*peek)(struct xtnt_node_set_if *set, struct xtnt_node **peek)
+ * @fn xtnt_status_t (*peek)(struct xtnt_node_set *set, struct xtnt_node **peek)
  * Return reference to next Node in Node Set
  * @param set A Node Set to operate on
  * @param peek[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
- * @fn xtnt_status_t (*root)(struct xtnt_node_set_if *set, struct xtnt_node **root)
+ * @fn xtnt_status_t (*root)(struct xtnt_node_set *set, struct xtnt_node **root)
  * Return the reference to the root Node in Node Set
  * @param set The Node Set to operate on
  * @param root[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
- * @fn xtnt_status_t (*state)(struct xtnt_node_set_if *set, struct xtnt_node_set_state **state)
+ * @fn xtnt_status_t (*state)(struct xtnt_node_set *set, struct xtnt_node_set_state **state)
  * Return the state of the Node Set
  * @param set The Node Set to operate on
  * @param state[out] The pointer to store the Node State at
  * @return status result of operation
  *
- * @fn xtnt_status_t (*insert)(struct xtnt_node_set_if *set, struct xtnt_node *node)
+ * @fn xtnt_status_t (*insert)(struct xtnt_node_set *set, struct xtnt_node *node)
  * Insert Node into Node Set
  * @param set The Node Set to operate on
  * @param node The Node to insert
  * @return status result of operation
  *
- * @fn xtnt_status_t (*insert_at)(struct xtnt_node_set_if *set, xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced)
+ * @fn xtnt_status_t (*insert_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced)
  * Insert Node into Node Set at index
  * @param set The Node Set to operate on
  * @param index The index to insert at
  * @param node the The Node to insert
  * @param[out] The pointer to store the Node that was replaced
+ * @return status result of operation
  *
- * @fn xtnt_status_t (*push)(struct xtnt_node_set_if *set, struct xtnt_node *node)
+ * @fn xtnt_status_t (*push)(struct xtnt_node_set *set, struct xtnt_node *node)
  * Insert Node into next position in Node Set
  * @param set The Node Set to operate on
  * @param node The node to insert
+ * @return status result of operation
  *
- * @fn xtnt_status_t (*remove)(struct xtnt_node_set_if *set, struct xtnt_node *node)
+ * @fn xtnt_status_t (*remove)(struct xtnt_node_set *set, struct xtnt_node *node)
  * Remove a node from a Node Set
+ * @param set The Node Set to operate on
+ * @param node The Node to remove from Node Set
+ * @return status result of operation
  */
-    xtnt_status_t (*remove)(struct xtnt_node_set_if *set, struct xtnt_node *node);
     xtnt_status_t (*remove_at)(struct xtnt_node_set_if *set, xtnt_uint_t index, struct xtnt_node **removed);
     xtnt_status_t (*pop)(struct xtnt_node_set_if *set, struct xtnt_node *node);
 
