@@ -39,8 +39,9 @@ AS_IF([test "x${DOXYGEN}" != "xno"],
 # Dot check
 AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
 AS_IF([test "x${DOXYGEN}" != "xno" && "x${GRAPHVIZ_DOT}" != "xno" ],
-      [AC_SUBST([HAVE_DOT], [YES])],
-      [AC_SUBST([HAVE_DOT], [NO])])
+      [AC_DEFINE([HAVE_DOT], [YES])],
+      [AC_DEFINE([HAVE_DOT], [NO])])
+AC_SUBST([HAVE_DOT])
 
 # pthread check
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
