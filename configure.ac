@@ -41,7 +41,8 @@ AS_IF([test "x${DOXYGEN}" != "xno"],
       [AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
        AS_IF([test "x${GRAPHVIZ_DOT}" != "xno"],
              [AM_CONDITIONAL([HAVE_DOT], [true])],
-             [AC_MSG_WARN([Graphviz dot tool not found. Call graphs in docs not available.])])])
+             [AC_MSG_WARN([Graphviz dot tool not found. Call graphs in docs not available.])])],
+      [AM_CONDITIONAL([HAVE_DOT], [false])])
 
 # pthread check
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
