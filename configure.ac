@@ -39,8 +39,8 @@ AS_IF([test "x${DOXYGEN}" != "xno"],
 # Dot check
 AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
 AS_IF([test "x${DOXYGEN}" != "xno" && "x${GRAPHVIZ_DOT}" != "xno" ],
-      AC_DEFINE([HAVE_DOT], ["YES"], ["Graphviz dot tool available."]),
-      [test "x${GRAPHVIZ_DOT}" == "xno"]
+      [AC_DEFINE([HAVE_DOT], ["YES"], ["Graphviz dot tool available."])],
+      [test "x${GRAPHVIZ_DOT}" == "xno"],
       AC_DEFINE([HAVE_DOT], ["NO"], ["Graphviz dot tool not available."]))
 AC_SUBST([HAVE_DOT])
 
