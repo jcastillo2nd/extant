@@ -108,8 +108,9 @@
  * Function interface for Node Set
  *
  * @fn xtnt_status_t (*index)(struct xtnt_node_set *set, xtnt_int_t index, struct xtnt_node **found)
- * Return node at index of Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_index()
+ * Return node at index of Node Set
  * @note For non-indexed Node Sets ( e.g. trees ) this may operate the same as search.
  * @param set A Node Set to operate on
  * @param index An index to reference for Node of Node Set
@@ -117,16 +118,18 @@
  * @return status result of operation
  *
  * @fn xtnt_status_t (*search)(struct xtnt_node_set *set, xtnt_uint_t key, struct xtnt_node **found)
- * Search Node Set for Node with matching key
  * @relates xtnt_node_set_if
+ * @see xtnt_set_search()
+ * Search Node Set for Node with matching key
  * @param set A Node Set to operate on
  * @param key The key to compare Nodes against
  * @param found[out] The pointer to store the found Node at, or NULL if not found
  * @return status result of operation
  *
  * @fn xtnt_status_t (*search_fn)(struct xtnt_node_set *set, void *fn, void *needle, struct xtnt_node **found)
- * Search Node Set for Node with search function fn, that accepts needle criteria
  * @relates xtnt_node_set_if
+ * @see xtnt_set_search_fn()
+ * Search Node Set for Node with search function fn, that accepts needle criteria
  * @param set A Node Set to operate on
  * @param fn A search function to run on each node
  * @param needle Search criteria for search function fn
@@ -134,52 +137,59 @@
  * @return status result of operation
  *
  * @fn xtnt_status_t (*first)(struct xtnt_node_set *set, struct xtnt_node **first)
- * Return first Node of Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_first()
+ * Return first Node of Node Set
  * @note Definition varies based on Node Set implementation, e.g. Tree may return lowest key Node
  * @param set A Node Set to operate on
  * @param first[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
  * @fn xtnt_status_t (*last)(struct xtnt_node_set *set, struct xtnt_node **last)
- * Return last Node of Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_last()
+ * Return last Node of Node Set
  * @note Definition varies based on Node Set implementation, e.g. Tree may return highest key Node
  * @param set A Node Set to operate on
  * @param last[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
  * @fn xtnt_status_t (*peek)(struct xtnt_node_set *set, struct xtnt_node **peek)
- * Return reference to next Node in Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_peek()
+ * Return reference to next Node in Node Set
  * @param set A Node Set to operate on
  * @param peek[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
  * @fn xtnt_status_t (*root)(struct xtnt_node_set *set, struct xtnt_node **root)
- * Return the reference to the root Node in Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_root()
+ * Return the reference to the root Node in Node Set
  * @param set The Node Set to operate on
  * @param root[out] The pointer to store the Node at, or NULL on empty Node Set
  * @return status result of operation
  *
  * @fn xtnt_status_t (*state)(struct xtnt_node_set *set, struct xtnt_node_set_state **state)
- * Return the state of the Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_state()
+ * Return the state of the Node Set
  * @param set The Node Set to operate on
  * @param state[out] The pointer to store the Node State at
  * @return status result of operation
  *
  * @fn xtnt_status_t (*insert)(struct xtnt_node_set *set, struct xtnt_node *node)
- * Insert Node into Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_insert()
+ * Insert Node into Node Set
  * @param set The Node Set to operate on
  * @param node The Node to insert
  * @return status result of operation
  *
  * @fn xtnt_status_t (*insert_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced)
- * Insert Node into Node Set at index
  * @relates xtnt_node_set_if
+ * @see xtnt_set_insert_at()
+ * Insert Node into Node Set at index
  * @param set The Node Set to operate on
  * @param index The index to insert at
  * @param node the The Node to insert
@@ -187,28 +197,88 @@
  * @return status result of operation
  *
  * @fn xtnt_status_t (*push)(struct xtnt_node_set *set, struct xtnt_node *node)
- * Insert Node into next position in Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_push()
+ * Insert Node into next position in Node Set
  * @param set The Node Set to operate on
  * @param node The node to insert
  * @return status result of operation
  *
  * @fn xtnt_status_t (*remove)(struct xtnt_node_set *set, struct xtnt_node *node)
- * Remove a node from a Node Set
  * @relates xtnt_node_set_if
+ * @see xtnt_set_remove()
+ * Remove a node from a Node Set
  * @param set The Node Set to operate on
  * @param node The Node to remove from Node Set
  * @return status result of operation
+ *
+ * @fn xtnt_status_t (*remove_at)(struct xtnt_node_set_if *set, xtnt_uint_t index, struct xtnt_node **removed)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_remove_at()
+ * Remove a Node from a Node Set at index
+ * @param set The Node Set to operate on
+ * @param index The index to remove from
+ * @param removed The pointer to store the Node that was removed
+ * @return status result of operation
+ *
+ * @fn xtnt_status_t (*pop)(struct xtnt_node_set_if *set, struct xtnt_node *node)
+ * @relates to xtnt_node_set_if
+ * @see xtnt_set_pop()
+ * Remove next Node from Node Set
+ * @param set The Node Set to operate on
+ * @param popped The pointer to store the Node that was removed
+ * @return status result of operation
+ *
+ * @fn xtnt_status_t (*sort)(struct xtnt_node_set_if *set)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_sort()
+ * Sort Node Set
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*sort_reverse)(struct xtnt_node_set_if *set)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_sort_reverse()
+ * Sort Node Set in reverse
+ * @param set The Node Set to operate on
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*sort_fn)(struct xtnt_node_set_if *set, void *fn)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_sort_fn()
+ * Sort Node Set by sort function fn
+ * @param set The Node Set to operate on
+ * @param fn The function to sort Nodes with
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*grow)(struct xtnt_node_set_if *set)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_grow()
+ * Grow Node Set length
+ * @param set The Node Set to operate on
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*grow_eval)(struct xtnt_node_set_if *set, size_t eval)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_grow_eval()
+ * Grow Node Set length with size evaluation
+ * @param set The Node Set to operate on
+ * @param eval The size to evaluate with
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*shrink)(struct xtnt_node_set_if *set)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_shrink()
+ * Shrink Node Set length
+ * @param set The Node Set to operate on
+ * @return status result of operation
+ * 
+ * @fn xtnt_status_t (*shrink_eval)(struct xtnt_node_set_if *set, size_t eval)
+ * @relates xtnt_node_set_if
+ * @see xtnt_set_shrink_eval()
+ * Shrink Node Set length with size evaluation
+ * @param set The Node Set to operate on
+ * @param eval The size to evaluate with
+ * @return status result of operation
+ * 
  */
-    xtnt_status_t (*remove_at)(struct xtnt_node_set_if *set, xtnt_uint_t index, struct xtnt_node **removed);
-    xtnt_status_t (*pop)(struct xtnt_node_set_if *set, struct xtnt_node *node);
 
-    xtnt_status_t (*sort)(struct xtnt_node_set_if *set);
-    xtnt_status_t (*sort_reverse)(struct xtnt_node_set_if *set);
-    xtnt_status_t (*sort_fn)(struct xtnt_node_set_if *set, void *fn);
-
-    xtnt_status_t (*grow)(struct xtnt_node_set_if *set);
-    xtnt_status_t (*grow_eval)(struct xtnt_node_set_if *set, size_t eval);
-    xtnt_status_t (*shrink)(struct xtnt_node_set_if *set);
-    xtnt_status_t (*shrink_eval)(struct xtnt_node_set_if *set, size_t eval);
-};
