@@ -39,10 +39,11 @@ AS_IF([test "x${DOXYGEN}" != "xno"],
 # Dot check
 AC_PATH_PROG([GRAPHVIZ_DOT], [dot], [no])
 AS_IF([test "x${DOXYGEN}" != "xno" && test "x${GRAPHVIZ_DOT}" != "xno" ],
-      [AC_DEFINE([HAVE_DOT], ["YES"], ["Graphviz dot tool available."])],
+      [AC_DEFINE([HAVE_DOT], ["YES"], ["Graphviz dot tool available."])
+       AC_SUBST([HAVE_DOT], [YES])],
       [test "x${GRAPHVIZ_DOT}" == "xno"],
-      AC_DEFINE([HAVE_DOT], ["NO"], ["Graphviz dot tool not available."]))
-AC_SUBST([HAVE_DOT])
+       AC_DEFINE([HAVE_DOT], ["NO"], ["Graphviz dot tool not available."])
+       AC_SUBST([HAVE_DOT], [NO]))
 
 # pthread check
 AC_SEARCH_LIBS([pthread_create], [pthread], [],
