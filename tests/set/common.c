@@ -28,33 +28,15 @@ SOFTWARE.
 */
 
 #include <check.h>
-#include <extant/set/common.h>
+#include <extant/set/node.h>
 
 #include <stdio.h>
 
-struct xtnt_node node1, node2;
-struct xtnt_node_set set1, set2;
+struct xtnt_node node;
 xtnt_uint_t value;
 
 void setup(void)
 {
-    value = 5;
-
-    node2.key = 5;
-    node2.value = &value;
-    node2.state = XTNT_ESUCCESS;
-    node2.quirk = XTNT_ESUCCESS;
-    node2.link[XTNT_NODE_HEAD] = \
-    node2.link[XTNT_NODE_MIDDLE] = \
-    node2.link[XTNT_NODE_TAIL] = NULL;
-
-    ck_assert_msg(pthread_mutex_init(&(set2.lock), NULL) == 0,
-        "Attempted to init set lock, but failed");
-    set2.link[XTNT_NODE_HEAD] = \
-    set2.link[XTNT_NODE_TAIL] = &node2;
-    set2.link[XTNT_NODE_MIDDLE] = NULL;
-    set2.count = 1;
-    set2.state = 0;
 }
 
 void teardown(void)
