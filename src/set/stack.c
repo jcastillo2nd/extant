@@ -4,7 +4,7 @@
 This source file is part of libextant
 libextant is made available under the MIT License.
 
-Copyright (c) 2016-2018 Javier Castillo II
+Copyright (c) 2016-2020 Javier Castillo II
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
