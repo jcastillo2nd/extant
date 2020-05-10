@@ -30,44 +30,6 @@ SOFTWARE.
 #include <extant/set/common.h>
 
 /**
- * @brief Initialize a node with empty values
- *
- * @param[in] node Node to initialize
- * @param[in] key Key to set for Node
- * @param[in] quirk Namespace key for node reference
- * @param[in] value Node value pointer
- * @return xtnt_node pointer or NULL if error
- */
-xtnt_status_t
-xtnt_node_initialize(
-    struct xtnt_node *node,
-    xtnt_uint_t key,
-    xtnt_uint_t quirk,
-    void *value)
-{
-    xtnt_status_t res = XTNT_EFAILURE;
-    if ((res = pthread_mutex_init(&(node->lock), NULL)) == XTNT_ESUCCESS) {
-        if ((res = pthread_mutex_lock(&(node->lock))) == XTNT_ESUCCESS) {
-            node->value = value;
-            node->link[0] = NULL;
-            node->link[1] = NULL;
-            node->link[2] = NULL;
-            node->key = key;
-            node->state = XTNT_ESUCCESS;
-            node->quirk = quirk;
-            if ((res = pthread_mutex_unlock(&(node->lock))) != XTNT_ZERO) {
-                XTNT_LOCK_SET_UNLOCK_FAIL(node->state);
-            }
-        } else {
-            XTNT_LOCK_SET_LOCK_FAIL(node->state);
-        }
-    } else {
-        XTNT_LOCK_SET_INIT_FAIL(node->state);
-    }
-    return res;
-}
-
-/**
  * @brief Copy a node set
  *
  * @param[in] src The source node set
@@ -82,23 +44,23 @@ xtnt_node_set_copy(
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_lock(&(src->lock))) == XTNT_ESUCCESS) {
         if ((res = pthread_mutex_lock(&(dst->lock))) == XTNT_ESUCCESS) {
-            dst->link[XTNT_NODE_HEAD] = src->link[XTNT_NODE_HEAD];
-            dst->link[XTNT_NODE_MIDDLE] = src->link[XTNT_NODE_MIDDLE];
-            dst->link[XTNT_NODE_TAIL] = src->link[XTNT_NODE_TAIL];
+            dst->root.link[XTNT_NODE_HEAD] = src->root.link[XTNT_NODE_HEAD];
+            dst->root.link[XTNT_NODE_MIDDLE] = src->root.link[XTNT_NODE_MIDDLE];
+            dst->root.link[XTNT_NODE_TAIL] = src->root.link[XTNT_NODE_TAIL];
             dst->count = src->count;
-            XTNT_STATE_SET_VALUE(dst->state, XTNT_ZERO);
+            XTNT_STATE_SET_VALUE(dst->root.state, XTNT_ZERO);
             if ((res = pthread_mutex_unlock(&(dst->lock))) == XTNT_ESUCCESS) {
                 if ((res = pthread_mutex_unlock(&(src->lock))) != XTNT_ESUCCESS) {
-                    XTNT_LOCK_SET_UNLOCK_FAIL(src->state);
+                    XTNT_LOCK_SET_UNLOCK_FAIL(src->root.state);
                 }
             } else {
-                XTNT_LOCK_SET_UNLOCK_FAIL(dst->state);
+                XTNT_LOCK_SET_UNLOCK_FAIL(dst->root.state);
             }
         } else {
-            XTNT_LOCK_SET_LOCK_FAIL(dst->state);
+            XTNT_LOCK_SET_LOCK_FAIL(dst->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(src->state);
+        XTNT_LOCK_SET_LOCK_FAIL(src->root.state);
     }
     return res;
 }
@@ -115,19 +77,19 @@ xtnt_node_set_initialize(
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_init(&(set->lock), NULL)) == XTNT_ZERO) {
         if ((res = pthread_mutex_lock(&(set->lock))) == XTNT_ZERO) {
-            set->link[0] = NULL;
-            set->link[1] = NULL;
-            set->link[2] = NULL;
+            set->root.link[0] = NULL;
+            set->root.link[1] = NULL;
+            set->root.link[2] = NULL;
             set->count = XTNT_ZERO;
-            set->state = XTNT_ZERO;
+            set->root.state = XTNT_ZERO;
             if ((res = pthread_mutex_unlock(&(set->lock))) != XTNT_ZERO) {
-                XTNT_LOCK_SET_UNLOCK_FAIL(set->state);
+                XTNT_LOCK_SET_UNLOCK_FAIL(set->root.state);
             }
         } else {
-            XTNT_LOCK_SET_LOCK_FAIL(set->state);
+            XTNT_LOCK_SET_LOCK_FAIL(set->root.state);
         }
     } else {
-        XTNT_LOCK_SET_INIT_FAIL(set->state);
+        XTNT_LOCK_SET_INIT_FAIL(set->root.state);
     }
     return res;
 }
@@ -150,46 +112,184 @@ xtnt_node_set_uninitialize(
     if ((res = pthread_mutex_lock(&(set->lock))) == XTNT_ZERO) {
         if ((res = pthread_mutex_unlock(&(set->lock))) == XTNT_ZERO) {
             if ((res = pthread_mutex_destroy(&(set->lock))) != XTNT_ZERO) {
-                XTNT_LOCK_SET_DESTROY_FAIL(set->state);
+                XTNT_LOCK_SET_DESTROY_FAIL(set->root.state);
             }
         } else {
-            XTNT_LOCK_SET_UNLOCK_FAIL(set->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(set->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(set->state);
+        XTNT_LOCK_SET_LOCK_FAIL(set->root.state);
     }
     return res;
 }
 
-/**
- * @brief Uninitialize a node
- *
- * @param[in] node Node to uninitialize
- */
-xtnt_status_t
-xtnt_node_uninitialize(
-    struct xtnt_node *node)
-{
-    xtnt_status_t res = XTNT_EFAILURE;
-    if ((res = pthread_mutex_lock(&(node->lock))) == XTNT_ZERO) {
-        if ((res = pthread_mutex_unlock(&(node->lock))) == XTNT_ZERO) {
-            if ((res = pthread_mutex_destroy(&(node->lock))) != XTNT_ZERO) {
-                XTNT_LOCK_SET_DESTROY_FAIL(node->state);
-            }
-        } else {
-            XTNT_LOCK_SET_UNLOCK_FAIL(node->state);
-        }
-    } else {
-        XTNT_LOCK_SET_LOCK_FAIL(node->state);
-    }
-    return res;
-}
-
-xtnt_status_t
+inline xtnt_status_t
 xtnt_set_index(
-    struct xtnt_node_set *s,
+    struct xtnt_node_set *set,
     xtnt_int_t index,
     struct xtnt_node **found)
 {
-    return s->fn->index((struct xtnt_node_set_if*) s, index, found);
+    return set->fn->index(set, index, found);
+}
+
+inline xtnt_status_t
+xtnt_set_search(
+    struct xtnt_node_set *set,
+    xtnt_uint_t key,
+    struct xtnt_node **found)
+{
+    return set->fn->search(set, key, found);
+}
+
+inline xtnt_status_t
+xtnt_set_search_fn(
+    struct xtnt_node_set *set,
+    void *fn,
+    void *needle,
+    struct xtnt_node **found)
+{
+    return set->fn->search_fn(set, fn, needle, found);
+}
+
+inline xtnt_status_t
+xtnt_set_first(
+    struct xtnt_node_set *set,
+    struct xtnt_node **first)
+{
+    return set->fn->first(set, first);
+}
+
+inline xtnt_status_t
+xtnt_set_last(
+    struct xtnt_node_set *set,
+    struct xtnt_node **last)
+{
+    return set->fn->last(set, last);
+}
+
+inline xtnt_status_t
+xtnt_set_peek(
+    struct xtnt_node_set *set,
+    struct xtnt_node **peek)
+{
+    return set->fn->peek(set, peek);
+}
+
+inline xtnt_status_t
+xtnt_set_root(
+    struct xtnt_node_set *set,
+    struct xtnt_node **root)
+{
+    return set->fn->root(set, root);
+}
+
+inline xtnt_status_t
+xtnt_set_state(
+    struct xtnt_node_set *set,
+    xtnt_uint_t **state)
+{
+    return set->state(set, state);
+}
+
+inline xtnt_status_t
+xtnt_set_insert(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node)
+{
+    return set->fn->insert(set, node);
+}
+
+inline xtnt_status_t
+xtnt_set_insert_at(
+    struct xtnt_node_set *set,
+    xtnt_uint_t index,
+    struct xtnt_node *node,
+    struct xtnt_node **replaced)
+{
+    return set->fn->insert_at(set, index, node, replaced);
+}
+
+inline xtnt_status_t
+xtnt_set_push(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node)
+{
+    set->fn->push(set, node);
+}
+
+inline xtnt_status_t
+xtnt_set_remove(
+    struct xtnt_node_set *set,
+    struct xtnt_node *node)
+{
+    return set->fn->remove(set, node);
+}
+
+xtnt_status_t
+inline xtnt_set_remove_at(
+    struct xtnt_node_set *set,
+    xtnt_uint_t index,
+    struct xtnt_node **removed)
+{
+    return set->fn->remove_at(set, index, removed);
+}
+
+inline xtnt_status_t
+xtnt_set_pop(
+    struct xtnt_node_set *set,
+    struct xtnt_node **node)
+{
+    return set->fn->pop(set, node);
+}
+
+inline xtnt_status_t
+xtnt_set_sort(
+    struct xtnt_node_set *set)
+{
+    return set->fn->sort(set);
+}
+
+inline xtnt_status_t
+xtnt_set_sort_reverse(
+    struct xtnt_node_set *set)
+{
+    return set->fn->sort_reverse(set);
+}
+
+inline xtnt_status_t
+xtnt_set_sort_fn(
+    struct xtnt_node_set *set,
+    void *fn)
+{
+    return set->fn->sort_fn(set, fn);
+}
+
+inline xtnt_status_t
+xtnt_set_grow(
+    struct xtnt_node_set *set)
+{
+    return set->fn->grow(set);
+}
+
+inline xtnt_status_t
+xtnt_set_grow_eval(
+    struct xtnt_node_set *set,
+    size_t eval)
+{
+    return set->fn->grow_eval(set, eval);
+}
+
+inline xtnt_status_t
+xtnt_set_shrink(
+    struct xtnt_node_set *set)
+{
+    return set->fn->shrink(set);
+}
+
+inline xtnt_status_t
+xtnt_set_shrink_eval(
+    struct xtnt_node_set *set,
+    size_t eval)
+{
+    return set->fn->shrink_eval(set, eval);
 }
