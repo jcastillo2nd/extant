@@ -64,7 +64,7 @@ struct xtnt_node_set_if {
 
     xtnt_status_t (*remove)(struct xtnt_node_set *set, struct xtnt_node *node);
     xtnt_status_t (*remove_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node **removed);
-    xtnt_status_t (*pop)(struct xtnt_node_set *set, struct xtnt_node *node);
+    xtnt_status_t (*pop)(struct xtnt_node_set *set, struct xtnt_node **node);
 
     xtnt_status_t (*sort)(struct xtnt_node_set *set);
     xtnt_status_t (*sort_reverse)(struct xtnt_node_set *set);
@@ -151,7 +151,7 @@ inline xtnt_set_remove_at(
 inline xtnt_status_t
 xtnt_set_pop(
     struct xtnt_node_set *set,
-    struct xtnt_node *node);
+    struct xtnt_node **node);
 
 inline xtnt_status_t
 xtnt_set_sort(
