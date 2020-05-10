@@ -64,8 +64,8 @@ int main(int argc, char **argv)
         }
     }
 
-    // ... Program encounters some situation with an urgent exit
-    result = pthread_cancel(logger_thread);
+    // ... Program encounters normal shutdown, and wants logger thread to exit
+    res = xtnt_logger_exit(logger);
     result = pthread_join(logger_thread, (void **) &status);
     res = xtnt_logger_destroy(&logger);
     int val = (int) PTHREAD_CANCELED;

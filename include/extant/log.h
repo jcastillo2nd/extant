@@ -191,6 +191,10 @@ xtnt_logger_entry_destroy(
     struct xtnt_logger_entry **entry);
 
 xtnt_status_t
+xtnt_logger_exit(
+    struct xtnt_logger *logger);
+
+xtnt_status_t
 xtnt_logger_initialize(
     struct xtnt_logger *logger);
 

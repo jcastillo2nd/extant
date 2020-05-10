@@ -151,6 +151,28 @@ xtnt_logger_destroy(
 }
 
 /**
+ * @brief Signal an xtnt_logger to exit
+ *
+ * @param[in] logger xtnt_logger to exit
+ * @returns result of xtnt_logger_exit
+ */
+xtnt_status_t
+xtnt_logger_exit(
+    struct xtnt_logger *logger)
+{
+    xtnt_status_t res = XTNT_EFAILURE;
+    if ((res = pthread_mutex_lock(&(logger->lock))) == XTNT_ESUCCESS) {
+        XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_PENDING_EXIT);
+        if ((res = pthread_mutex_unlock(&(logger->lock))) != XTNT_ESUCCESS) {
+            XTNT_LOCK_SET_UNLOCK_FAIL(logger->state);
+        }
+    } else {
+        XTNT_LOCK_SET_LOCK_FAIL(logger->state);
+    }
+    return res;
+}
+
+/**
  * @brief Allocate and initialize an xtnt_logger_entry
  *
  * @param[in] data_length Memory size allocated for data
@@ -285,6 +307,7 @@ xtnt_logger_process(
 // If we've completed our batch size iterations or empty queue
         if (node == NULL) {
             fflush(logger->log); // flush
+            state = XTNT_STATE(logger->state);
             if (state == XTNT_LOGGER_PENDING_EXIT) {
                 pthread_exit(0);
             }
