@@ -48,10 +48,10 @@ xtnt_list_delete(
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
         if (list->count > index) {
             if (index < (list->count >> 1)) {
-                *deleted = list->link[XTNT_NODE_HEAD];
+                *deleted = list->root.link[XTNT_NODE_HEAD];
                 dir = XTNT_NODE_TAIL;
             } else {
-                *deleted = list->link[XTNT_NODE_TAIL];
+                *deleted = list->root.link[XTNT_NODE_TAIL];
                 index = list->count - (index + 1);
             }
             for (xtnt_uint_t idx = 0; idx < index; idx++) {
@@ -60,17 +60,17 @@ xtnt_list_delete(
             if ((*deleted)->link[XTNT_NODE_HEAD] == NULL) {
                 if ((*deleted)->link[XTNT_NODE_TAIL] != NULL) {
                     (*deleted)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = NULL;
-                    list->link[XTNT_NODE_HEAD] = (*deleted)->link[XTNT_NODE_TAIL]; 
+                    list->root.link[XTNT_NODE_HEAD] = (*deleted)->link[XTNT_NODE_TAIL]; 
                 } else {
-                    list->link[XTNT_NODE_HEAD] = NULL;
+                    list->root.link[XTNT_NODE_HEAD] = NULL;
                 }
             }
             if ((*deleted)->link[XTNT_NODE_TAIL] == NULL) {
                 if ((*deleted)->link[XTNT_NODE_HEAD] != NULL) {
                     (*deleted)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = NULL;
-                    list->link[XTNT_NODE_TAIL] = (*deleted)->link[XTNT_NODE_HEAD];
+                    list->root.link[XTNT_NODE_TAIL] = (*deleted)->link[XTNT_NODE_HEAD];
                 } else {
-                    list->link[XTNT_NODE_TAIL] = NULL;
+                    list->root.link[XTNT_NODE_TAIL] = NULL;
                 }
             }
             list->count--;
@@ -78,10 +78,10 @@ xtnt_list_delete(
             *deleted = NULL;
         }
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
@@ -105,10 +105,10 @@ xtnt_list_get(
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
         if (list->count > index) {
             if (index < (list->count >> 1)) {
-                *node = list->link[XTNT_NODE_HEAD];
+                *node = list->root.link[XTNT_NODE_HEAD];
                 dir = XTNT_NODE_TAIL;
             } else {
-                *node = list->link[XTNT_NODE_TAIL];
+                *node = list->root.link[XTNT_NODE_TAIL];
                 index = list->count - (index + 1);
             }
             for (xtnt_uint_t idx = 0; idx < index; idx++) {
@@ -118,10 +118,10 @@ xtnt_list_get(
             *node = NULL;
         }
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
@@ -146,22 +146,22 @@ xtnt_list_insert(
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
         if (list->count == 0){
             // We are the head and tail
-            list->link[XTNT_NODE_HEAD] = node;
-            list->link[XTNT_NODE_TAIL] = node;
+            list->root.link[XTNT_NODE_HEAD] = node;
+            list->root.link[XTNT_NODE_TAIL] = node;
         } else {
             // We have a new tail
-            node->link[XTNT_NODE_TAIL] = list->link[XTNT_NODE_HEAD];
+            node->link[XTNT_NODE_TAIL] = list->root.link[XTNT_NODE_HEAD];
             // We are a new head to our tail
-            list->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
+            list->root.link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
             // We are the new head
-            list->link[XTNT_NODE_HEAD] = node;
+            list->root.link[XTNT_NODE_HEAD] = node;
         }
         list->count++;
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
@@ -201,10 +201,10 @@ xtnt_list_replace(
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
         if (list->count > index) {
             if (index < (list->count >> 1)) {
-                *replaced = list->link[XTNT_NODE_HEAD];
+                *replaced = list->root.link[XTNT_NODE_HEAD];
                 dir = XTNT_NODE_TAIL;
             } else {
-                *replaced = list->link[XTNT_NODE_TAIL];
+                *replaced = list->root.link[XTNT_NODE_TAIL];
                 index = list->count - (index + 1);
             }
             for (xtnt_uint_t idx = 0; idx < index; idx++) {
@@ -214,22 +214,22 @@ xtnt_list_replace(
             if ((*replaced)->link[XTNT_NODE_HEAD] != NULL) {
                 (*replaced)->link[XTNT_NODE_HEAD]->link[XTNT_NODE_TAIL] = node;
             } else {
-                list->link[XTNT_NODE_HEAD] = node; 
+                list->root.link[XTNT_NODE_HEAD] = node; 
             }
             node->link[XTNT_NODE_TAIL] = (*replaced)->link[XTNT_NODE_TAIL];
             if ((*replaced)->link[XTNT_NODE_TAIL] != NULL) {
                 (*replaced)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = node;
             } else {
-                list->link[XTNT_NODE_HEAD] = node;
+                list->root.link[XTNT_NODE_HEAD] = node;
             }
         } else {
             *replaced = NULL;
         }
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
@@ -250,20 +250,20 @@ xtnt_list_search(
 {
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
-        *found = list->link[XTNT_NODE_HEAD];
+        *found = list->root.link[XTNT_NODE_HEAD];
         do {
             if (*found == NULL || (*found)->key == key) {
                 break;
             }
         } while ((*found = (*found)->link[XTNT_NODE_TAIL]));
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
@@ -295,20 +295,20 @@ xtnt_list_search_fn(
     xtnt_status_t res = XTNT_EFAILURE;
     xtnt_uint_t (*test)(void *, struct xtnt_node *) = test_fn;
     if ((res = pthread_mutex_lock(&(list->lock))) == XTNT_ESUCCESS) {
-        *found = list->link[XTNT_NODE_HEAD];
+        *found = list->root.link[XTNT_NODE_HEAD];
         do {
             if (*found == NULL || (test(ctx, *found) != 0)) {
                 break;
             }
         } while ((*found = (*found)->link[XTNT_NODE_TAIL]));
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
         if ((res = pthread_mutex_unlock(&(list->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(list->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(list->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(list->state);
+        XTNT_LOCK_SET_LOCK_FAIL(list->root.state);
     }
     return res;
 }
