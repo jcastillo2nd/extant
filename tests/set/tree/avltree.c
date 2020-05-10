@@ -56,9 +56,9 @@ void setup(void)
     node3t1.link[XTNT_NODE_MIDDLE] = NULL;
     node3t1.link[XTNT_NODE_TAIL] = &node2t1;
 
-    tree1.link[XTNT_NODE_HEAD] = &node3t1;
-    tree1.link[XTNT_NODE_MIDDLE] = NULL;
-    tree1.link[XTNT_NODE_TAIL] = &node1t1;
+    tree1.root.link[XTNT_NODE_HEAD] = &node3t1;
+    tree1.root.link[XTNT_NODE_MIDDLE] = NULL;
+    tree1.root.link[XTNT_NODE_TAIL] = &node1t1;
     tree1.count = 3;
 
     node1t2.key = 4;
@@ -73,9 +73,9 @@ void setup(void)
     node3t2.value = &value3;
     node3t2.link[0] = node3t2.link[1] = node3t2.link[2] = NULL;
 
-    tree2.link[XTNT_NODE_HEAD] = NULL;
-    tree2.link[XTNT_NODE_MIDDLE] = NULL;
-    tree2.link[XTNT_NODE_TAIL] = NULL;
+    tree2.root.link[XTNT_NODE_HEAD] = NULL;
+    tree2.root.link[XTNT_NODE_MIDDLE] = NULL;
+    tree2.root.link[XTNT_NODE_TAIL] = NULL;
     tree2.count = 0;
 }
 
