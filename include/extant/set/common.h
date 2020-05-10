@@ -31,39 +31,17 @@ SOFTWARE.
 #define _XTNT_SET_COMMON_H_
 
 #include <extant/error.h>
-
-#define XTNT_NODE_HEAD 0
-#define XTNT_NODE_LEFT 0
-#define XTNT_NODE_MIDDLE 1
-#define XTNT_NODE_CENTER 1
-#define XTNT_NODE_PARENT 1
-#define XTNT_NODE_TAIL 2
-#define XTNT_NODE_RIGHT 2
-
-struct xtnt_node {
-    void *value;
-    struct xtnt_node *link[3];
-    xtnt_uint_t key;
-    xtnt_uint_t state;
-    xtnt_uint_t quirk;
-    pthread_mutex_t lock;
-};
-
-
-struct xtnt_node_set_state {
-    xtnt_uint_t size;
-    xtnt_uint_t count;
-    xtnt_uint_t state;
-};
+#include <extant/set/node.h>
 
 struct xtnt_node_set_if; // Forward Declaration
 
 struct xtnt_node_set {
-    const struct xtnt_node_set_if *fn;
-    struct xtnt_node *link[3];
-    xtnt_uint_t size;
+    union {
+        struct xtnt_node root;
+    };
     xtnt_uint_t count;
-    xtnt_uint_t state;
+    xtnt_uint_t size;
+    const struct xtnt_node_set_if *fn;
     pthread_mutex_t lock;
 };
 
@@ -78,7 +56,7 @@ struct xtnt_node_set_if {
     xtnt_status_t (*last)(struct xtnt_node_set *set, struct xtnt_node **last);
     xtnt_status_t (*peek)(struct xtnt_node_set *set, struct xtnt_node **peek);
     xtnt_status_t (*root)(struct xtnt_node_set *set, struct xtnt_node **root);
-    xtnt_status_t (*state)(struct xtnt_node_set *set, struct xtnt_node_set_state **state);
+    xtnt_status_t (*state)(struct xtnt_node_set *set, xtnt_uint_t **state);
 /* Modifiers */
     xtnt_status_t (*insert)(struct xtnt_node_set *set, struct xtnt_node *node);
     xtnt_status_t (*insert_at)(struct xtnt_node_set *set, xtnt_uint_t index, struct xtnt_node *node, struct xtnt_node **replaced);
@@ -140,7 +118,7 @@ xtnt_set_root(
 inline xtnt_status_t
 xtnt_set_state(
     struct xtnt_node_set *set,
-    struct xtnt_node_set_state **state);
+    xtnt_uint_t **state);
 
 inline xtnt_status_t
 xtnt_set_insert(
@@ -207,13 +185,6 @@ xtnt_set_shrink_eval(
     size_t eval);
 
 xtnt_status_t
-xtnt_node_initialize(
-    struct xtnt_node *node,
-    xtnt_uint_t key,
-    xtnt_uint_t quirk,
-    void *value);
-
-xtnt_status_t
 xtnt_node_set_copy(
     struct xtnt_node_set *src,
     struct xtnt_node_set *dst);
@@ -225,9 +196,5 @@ xtnt_node_set_initialize(
 xtnt_status_t
 xtnt_node_set_uninitialize(
     struct xtnt_node_set *set);
-
-xtnt_status_t
-xtnt_node_uninitialize(
-    struct xtnt_node *node);
 
 #endif /* ifndef _XTNT_SET_COMMON_H_ */
