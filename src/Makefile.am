@@ -4,13 +4,13 @@ lib_LTLIBRARIES = libextant.la
 
 libextant_la_SOURCES = extant.c \
 					   common.c \
-					   log/log.c \
 					   set/array.c \
 					   set/common.c \
 					   set/list.c \
-					   set/node.c
+					   set/node.c \
 					   set/queue.c \
-					   set/stack.c
+					   set/stack.c \
+					   log/log.c
 
 if DSO_LTDL
 libextant_la_SOURCES += dso/dso.c dso/ltdl.c
