@@ -45,14 +45,14 @@ xtnt_stack_peek(
 {
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
-        if (stack->link[XTNT_NODE_HEAD] != NULL) {
-            *node = stack->link[XTNT_NODE_HEAD];
+        if (stack->root.link[XTNT_NODE_HEAD] != NULL) {
+            *node = stack->root.link[XTNT_NODE_HEAD];
         }
         if ((res = pthread_mutex_unlock(&(stack->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+        XTNT_LOCK_SET_LOCK_FAIL(stack->root.state);
     }
     return res;
 }
@@ -72,23 +72,23 @@ xtnt_stack_pop(
 {
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
-        *node = stack->link[XTNT_NODE_HEAD];
+        *node = stack->root.link[XTNT_NODE_HEAD];
         if (*node != NULL) {
             // Use of size_t to compare pointers lead to any bugs?
-            if ((size_t) stack->link[XTNT_NODE_HEAD] ^ (size_t) stack->link[XTNT_NODE_TAIL]) {
+            if ((size_t) stack->root.link[XTNT_NODE_HEAD] ^ (size_t) stack->root.link[XTNT_NODE_TAIL]) {
                 (*node)->link[XTNT_NODE_TAIL]->link[XTNT_NODE_HEAD] = NULL;
-                stack->link[XTNT_NODE_HEAD] = (*node)->link[XTNT_NODE_TAIL];
+                stack->root.link[XTNT_NODE_HEAD] = (*node)->link[XTNT_NODE_TAIL];
             } else {
-                stack->link[XTNT_NODE_HEAD] = NULL;
-                stack->link[XTNT_NODE_TAIL] = NULL;
+                stack->root.link[XTNT_NODE_HEAD] = NULL;
+                stack->root.link[XTNT_NODE_TAIL] = NULL;
             }
             stack->count--;
         }
         if ((res = pthread_mutex_unlock(&(stack->lock))) == XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+        XTNT_LOCK_SET_LOCK_FAIL(stack->root.state);
     }
     return res;
 }
@@ -108,20 +108,20 @@ xtnt_stack_push(
 {
     xtnt_status_t res = XTNT_EFAILURE;
     if ((res = pthread_mutex_lock(&(stack->lock))) == XTNT_ESUCCESS) {
-        if (stack->link[XTNT_NODE_TAIL] != NULL) {
-            stack->link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
-            node->link[XTNT_NODE_TAIL] = stack->link[XTNT_NODE_HEAD];
-            stack->link[XTNT_NODE_HEAD] = node;
+        if (stack->root.link[XTNT_NODE_TAIL] != NULL) {
+            stack->root.link[XTNT_NODE_HEAD]->link[XTNT_NODE_HEAD] = node;
+            node->link[XTNT_NODE_TAIL] = stack->root.link[XTNT_NODE_HEAD];
+            stack->root.link[XTNT_NODE_HEAD] = node;
         } else {
-            stack->link[XTNT_NODE_TAIL] = node;
-            stack->link[XTNT_NODE_HEAD] = node;
+            stack->root.link[XTNT_NODE_TAIL] = node;
+            stack->root.link[XTNT_NODE_HEAD] = node;
         }
         stack->count++;
         if ((res = pthread_mutex_unlock(&(stack->lock))) != XTNT_ESUCCESS) {
-            XTNT_LOCK_SET_UNLOCK_FAIL(stack->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(stack->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(stack->state);
+        XTNT_LOCK_SET_LOCK_FAIL(stack->root.state);
     }
     return res;
 }
