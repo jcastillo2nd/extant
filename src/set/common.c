@@ -123,7 +123,7 @@ xtnt_node_set_uninitialize(
     return res;
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_index(
     struct xtnt_node_set *set,
     xtnt_int_t index,
@@ -132,7 +132,7 @@ xtnt_set_index(
     return set->fn->index(set, index, found);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_search(
     struct xtnt_node_set *set,
     xtnt_uint_t key,
@@ -141,7 +141,7 @@ xtnt_set_search(
     return set->fn->search(set, key, found);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_search_fn(
     struct xtnt_node_set *set,
     void *fn,
@@ -151,7 +151,7 @@ xtnt_set_search_fn(
     return set->fn->search_fn(set, fn, needle, found);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_first(
     struct xtnt_node_set *set,
     struct xtnt_node **first)
@@ -159,7 +159,7 @@ xtnt_set_first(
     return set->fn->first(set, first);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_last(
     struct xtnt_node_set *set,
     struct xtnt_node **last)
@@ -167,7 +167,7 @@ xtnt_set_last(
     return set->fn->last(set, last);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_peek(
     struct xtnt_node_set *set,
     struct xtnt_node **peek)
@@ -175,7 +175,7 @@ xtnt_set_peek(
     return set->fn->peek(set, peek);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_root(
     struct xtnt_node_set *set,
     struct xtnt_node **root)
@@ -183,7 +183,7 @@ xtnt_set_root(
     return set->fn->root(set, root);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_state(
     struct xtnt_node_set *set,
     xtnt_uint_t **state)
@@ -191,7 +191,7 @@ xtnt_set_state(
     return set->state(set, state);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_insert(
     struct xtnt_node_set *set,
     struct xtnt_node *node)
@@ -199,7 +199,7 @@ xtnt_set_insert(
     return set->fn->insert(set, node);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_insert_at(
     struct xtnt_node_set *set,
     xtnt_uint_t index,
@@ -209,7 +209,7 @@ xtnt_set_insert_at(
     return set->fn->insert_at(set, index, node, replaced);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_push(
     struct xtnt_node_set *set,
     struct xtnt_node *node)
@@ -217,7 +217,7 @@ xtnt_set_push(
     set->fn->push(set, node);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_remove(
     struct xtnt_node_set *set,
     struct xtnt_node *node)
@@ -226,7 +226,7 @@ xtnt_set_remove(
 }
 
 xtnt_status_t
-inline xtnt_set_remove_at(
+extern inline xtnt_set_remove_at(
     struct xtnt_node_set *set,
     xtnt_uint_t index,
     struct xtnt_node **removed)
@@ -234,7 +234,7 @@ inline xtnt_set_remove_at(
     return set->fn->remove_at(set, index, removed);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_pop(
     struct xtnt_node_set *set,
     struct xtnt_node **node)
@@ -242,21 +242,21 @@ xtnt_set_pop(
     return set->fn->pop(set, node);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_sort(
     struct xtnt_node_set *set)
 {
     return set->fn->sort(set);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_sort_reverse(
     struct xtnt_node_set *set)
 {
     return set->fn->sort_reverse(set);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_sort_fn(
     struct xtnt_node_set *set,
     void *fn)
@@ -264,14 +264,14 @@ xtnt_set_sort_fn(
     return set->fn->sort_fn(set, fn);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_grow(
     struct xtnt_node_set *set)
 {
     return set->fn->grow(set);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_grow_eval(
     struct xtnt_node_set *set,
     size_t eval)
@@ -279,14 +279,14 @@ xtnt_set_grow_eval(
     return set->fn->grow_eval(set, eval);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_shrink(
     struct xtnt_node_set *set)
 {
     return set->fn->shrink(set);
 }
 
-inline xtnt_status_t
+extern inline xtnt_status_t
 xtnt_set_shrink_eval(
     struct xtnt_node_set *set,
     size_t eval)

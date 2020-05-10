@@ -76,110 +76,110 @@ struct xtnt_node_set_if {
     xtnt_status_t (*shrink_eval)(struct xtnt_node_set *set, size_t eval);
 };
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_index(
     struct xtnt_node_set *set,
     xtnt_int_t index,
     struct xtnt_node **found);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_search(
     struct xtnt_node_set *set,
     xtnt_uint_t key,
     struct xtnt_node **found);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_search_fn(
     struct xtnt_node_set *set,
     void *fn,
     void *needle,
     struct xtnt_node **found);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_first(
     struct xtnt_node_set *set,
     struct xtnt_node **first);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_last(
     struct xtnt_node_set *set,
     struct xtnt_node **last);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_peek(
     struct xtnt_node_set *set,
     struct xtnt_node **peek);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_root(
     struct xtnt_node_set *set,
     struct xtnt_node **root);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_state(
     struct xtnt_node_set *set,
     xtnt_uint_t **state);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_insert(
     struct xtnt_node_set *set,
     struct xtnt_node *node);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_insert_at(
     struct xtnt_node_set *set,
     xtnt_uint_t index,
     struct xtnt_node *node,
     struct xtnt_node **replaced);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_push(
     struct xtnt_node_set *set,
     struct xtnt_node *node);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_remove(
     struct xtnt_node_set *set,
     struct xtnt_node *node);
 
 xtnt_status_t
-inline xtnt_set_remove_at(
+xtnt_set_remove_at(
     struct xtnt_node_set *set,
     xtnt_uint_t index,
     struct xtnt_node **removed);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_pop(
     struct xtnt_node_set *set,
     struct xtnt_node **node);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_sort(
     struct xtnt_node_set *set);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_sort_reverse(
     struct xtnt_node_set *set);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_sort_fn(
     struct xtnt_node_set *set,
     void *fn);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_grow(
     struct xtnt_node_set *set);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_grow_eval(
     struct xtnt_node_set *set,
     size_t eval);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_shrink(
     struct xtnt_node_set *set);
 
-inline xtnt_status_t
+xtnt_status_t
 xtnt_set_shrink_eval(
     struct xtnt_node_set *set,
     size_t eval);
