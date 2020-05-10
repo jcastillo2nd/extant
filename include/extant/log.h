@@ -63,7 +63,8 @@ SOFTWARE.
 #define XTNT_LOG_ERROR (4) /**< Error log entry bit */
 #define XTNT_LOG_LEVEL_WARNING (3) /**< Warning log entry bits */
 #define XTNT_LOG_WARNING (2) /**< Warning log entry bit */
-#define XTNT_LOG_LEVEL_INFO (1) /**< Info log entry bit */
+#define XTNT_LOG_LEVEL_INFO (1) /**< Info log entry bits */
+#define XTNT_LOG_INFO (1) /**< Info log entry bit */
 #define XTNT_LOG_LEVEL_QUIET (0) /**< No log entry bits */
 
 #define XTNT_LOGGER_OPEN (0) /**< Logger accepting logs */

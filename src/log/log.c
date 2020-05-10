@@ -266,35 +266,29 @@ xtnt_logger_process(
 
     xtnt_uint_t iter = XTNT_LOG_BATCH_SIZE;
     xtnt_status_t res = XTNT_ESUCCESS;
+    xtnt_uint_t level;
+    xtnt_uint_t state;
 
     while (1){
         struct xtnt_logger_entry *entry= NULL;
         struct xtnt_node *node = NULL;
         xtnt_int_t error = errno;
 
-        pthread_mutex_lock(&(logger->lock));
-        xtnt_uint_t level = logger->default_level;
-        xtnt_uint_t state = XTNT_STATE(logger->state);
-        pthread_mutex_unlock(&(logger->lock));
 
-        if (state == XTNT_LOGGER_PENDING_EXIT) {
-            XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_COMPLETED_EXIT);
-        } else {
-            if ((res = xtnt_queue_pop(&(logger->queue), &node)) != XTNT_ESUCCESS ) {
-                printf("xtnt error:: Logger queue state invalid : xtnt_queue_pop returned %i", res);
+        if ((res = xtnt_queue_pop(&(logger->queue), &node)) != XTNT_ESUCCESS ) {
+            printf("xtnt error:: Logger queue state invalid : xtnt_queue_pop returned %i", res);
 /**
  * @todo Catch queue state and try to recover
  */
-            }
         }
 
-        if (node == NULL || !(iter)) {
-            iter = XTNT_LOG_BATCH_SIZE;
-            fflush(logger->log);
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-            pthread_testcancel();
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            sched_yield();
+// If we've completed our batch size iterations or empty queue
+        if (node == NULL) {
+            fflush(logger->log); // flush
+            if (state == XTNT_LOGGER_PENDING_EXIT) {
+                pthread_exit(0);
+            }
+            sched_yield(); // wait for scheduling
         } else {
             entry = (struct xtnt_logger_entry *) node->value;
             char * (*get_string)(struct xtnt_logger_entry *) = entry->fmt_fn;
@@ -304,12 +298,28 @@ xtnt_logger_process(
              */
             if (entry->level & level) {
                 if(XTNT_IS_EFAILURE((res = fputs(get_string(entry), logger->log)))) {
+                    error = errno;
                     XTNT_STATE_SET_VALUE(logger->state, XTNT_LOGGER_WRITE_FAIL);
                     pthread_exit(&error);
                 }
             }
             xtnt_logger_entry_destroy(&entry);
-            iter--;
+            if (iter == 0) {
+                fflush(logger->log);
+
+                pthread_mutex_lock(&(logger->lock));
+                level = logger->default_level;
+                state = XTNT_STATE(logger->state);
+                pthread_mutex_unlock(&(logger->lock));
+
+                pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+                pthread_testcancel();
+                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+
+                iter = XTNT_LOG_BATCH_SIZE;
+            } else {
+                iter--;
+            }
         }
     }
 }
