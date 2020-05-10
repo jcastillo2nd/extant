@@ -52,15 +52,15 @@ xtnt_array_create(
     if (marray != NULL) {
         if ((res = xtnt_node_set_initialize(marray)) == XTNT_ESUCCESS) {
             if ((res = pthread_mutex_lock(&(marray->lock))) == XTNT_ESUCCESS) {
-                marray->link[XTNT_NODE_HEAD] = narray;
-                marray->link[XTNT_NODE_TAIL] = narray + (count - 1);
+                marray->root.link[XTNT_NODE_HEAD] = narray;
+                marray->root.link[XTNT_NODE_TAIL] = narray + (count - 1);
                 marray->count = count;
                 if ((res = pthread_mutex_unlock(&(marray->lock))) != XTNT_ESUCCESS) {
-                    XTNT_LOCK_SET_UNLOCK_FAIL(marray->state);
+                    XTNT_LOCK_SET_UNLOCK_FAIL(marray->root.state);
                 }
                 *array = marray;
             } else {
-                XTNT_LOCK_SET_LOCK_FAIL(marray->state);
+                XTNT_LOCK_SET_LOCK_FAIL(marray->root.state);
             }
         } else {
             free(marray);
@@ -93,17 +93,17 @@ xtnt_array_delete(
     *node = NULL;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_LOCK_FAIL(array->state);
+        XTNT_LOCK_SET_LOCK_FAIL(array->root.state);
     }
     if (index < array->count) {
-        if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
-            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
-            ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] = NULL;
+        if (((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index] != NULL) {
+            *node = ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index];
+            ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index] = NULL;
         }
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_UNLOCK_FAIL(array->state);
+        XTNT_LOCK_SET_UNLOCK_FAIL(array->root.state);
     }
     return fail;
 }
@@ -130,10 +130,10 @@ xtnt_array_destroy(
             free(a);
             *array = NULL;
         } else {
-            XTNT_LOCK_SET_UNLOCK_FAIL(a->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(a->root.state);
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(a->state);
+        XTNT_LOCK_SET_LOCK_FAIL(a->root.state);
         status = XTNT_EFAILURE;
     }
     return status;
@@ -157,16 +157,16 @@ xtnt_array_get(
 {
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_LOCK_FAIL(array->state);
+        XTNT_LOCK_SET_LOCK_FAIL(array->root.state);
     }
     if (index < array->count) {
-        if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] != NULL) {
-             *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index];
+        if (((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index] != NULL) {
+             *node = ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index];
         }
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_UNLOCK_FAIL(array->state);
+        XTNT_LOCK_SET_UNLOCK_FAIL(array->root.state);
     }
     return fail;
 }
@@ -191,17 +191,17 @@ xtnt_array_insert(
     fail = pthread_mutex_lock(&(array->lock));
     if (fail == 0) {
         if (index < array->count) {
-                ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[index] = node;
+                ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[index] = node;
         } else {
             fail = EINVAL;
         }
         xtnt_int_t fail_unlock = pthread_mutex_unlock(&(array->lock));
         if (fail_unlock){
-            XTNT_LOCK_SET_UNLOCK_FAIL(array->state);
+            XTNT_LOCK_SET_UNLOCK_FAIL(array->root.state);
             fail = fail_unlock;
         }
     } else {
-        XTNT_LOCK_SET_LOCK_FAIL(array->state);
+        XTNT_LOCK_SET_LOCK_FAIL(array->root.state);
     }
     return fail;
 }
@@ -224,19 +224,19 @@ xtnt_array_search(
 {   
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_LOCK_FAIL(array->state);
+        XTNT_LOCK_SET_LOCK_FAIL(array->root.state);
         return fail;
     }
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
-        if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx] != NULL &&
-            ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx]->key == key) {
-            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
+        if (((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx] != NULL &&
+            ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx]->key == key) {
+            *node = ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx];
             break;
         }
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_UNLOCK_FAIL(array->state);
+        XTNT_LOCK_SET_UNLOCK_FAIL(array->root.state);
     }
     return fail;
 }
@@ -262,19 +262,19 @@ xtnt_array_search_fn(
     xtnt_uint_t (*test)(void *, void *) = test_fn;
     xtnt_int_t fail = pthread_mutex_lock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_LOCK_FAIL(array->state);
+        XTNT_LOCK_SET_LOCK_FAIL(array->root.state);
         return fail;
     }
     for (xtnt_uint_t idx = 0; idx < array->count; idx++){
-        if (((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx] != NULL &&
-            test(ctx, ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx])) {
-            *node = ((struct xtnt_node**) array->link[XTNT_NODE_HEAD])[idx];
+        if (((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx] != NULL &&
+            test(ctx, ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx])) {
+            *node = ((struct xtnt_node**) array->root.link[XTNT_NODE_HEAD])[idx];
             break;
         }
     }
     fail = pthread_mutex_unlock(&(array->lock));
     if (fail) {
-        XTNT_LOCK_SET_UNLOCK_FAIL(array->state);
+        XTNT_LOCK_SET_UNLOCK_FAIL(array->root.state);
     }
     return fail;
 }
