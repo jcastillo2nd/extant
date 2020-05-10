@@ -64,14 +64,14 @@ void setup(void)
         in_nodes[idx].link[XTNT_NODE_HEAD] = NULL;
     }
 
-    sets[0].link[XTNT_NODE_HEAD] = &nodes[0];
-    sets[0].link[XTNT_NODE_MIDDLE] = NULL;
-    sets[0].link[XTNT_NODE_TAIL] = &nodes[15];
+    sets[0].root.link[XTNT_NODE_HEAD] = &nodes[0];
+    sets[0].root.link[XTNT_NODE_MIDDLE] = NULL;
+    sets[0].root.link[XTNT_NODE_TAIL] = &nodes[15];
     sets[0].count = 16;
 
-    sets[1].link[XTNT_NODE_HEAD] = \
-    sets[1].link[XTNT_NODE_MIDDLE] = \
-    sets[1].link[XTNT_NODE_TAIL] = NULL;
+    sets[1].root.link[XTNT_NODE_HEAD] = \
+    sets[1].root.link[XTNT_NODE_MIDDLE] = \
+    sets[1].root.link[XTNT_NODE_TAIL] = NULL;
     sets[1].count = 0;
 
     if (pthread_mutex_init(&sets[0].lock, NULL)) {
@@ -116,15 +116,15 @@ START_TEST (test_xtnt_list_delete_up)
         ck_assert_msg(sets[0].count == (16 - (idx + 1)),
             "Expected set.count of %u, but got set.count=%u", (16 - (idx + 1)), sets[0].count);
         if (idx < 15) {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &nodes[idx + 1],
-                "Expected set head as node%u but got node%u", (idx + 1), sets[0].link[XTNT_NODE_HEAD]->key);
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &nodes[idx + 1],
+                "Expected set head as node%u but got node%u", (idx + 1), sets[0].root.link[XTNT_NODE_HEAD]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
                 "Expected set tail as node0 but was not node0");
         } else {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == NULL,
-                "Expected set head as NULL but got node%u", sets[0].link[XTNT_NODE_HEAD]->key);
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == NULL,
-                "Expected set tail as NULL but got node%u", sets[0].link[XTNT_NODE_TAIL]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == NULL,
+                "Expected set head as NULL but got node%u", sets[0].root.link[XTNT_NODE_HEAD]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == NULL,
+                "Expected set tail as NULL but got node%u", sets[0].root.link[XTNT_NODE_TAIL]->key);
         }
     }
 }
@@ -144,15 +144,15 @@ START_TEST (test_xtnt_list_delete_down)
         ck_assert_msg(sets[0].count == cidx,
             "Expected set.count of %u, but got set.count=%u", cidx, sets[0].count);
         if (idx > 1) {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &nodes[0],
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &nodes[0],
                 "Expected set head as node0 but was not node0");
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[cidx - 1],
-                "Expected set head as node%u but got node%u", (cidx - 1), sets[0].link[XTNT_NODE_TAIL]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[cidx - 1],
+                "Expected set head as node%u but got node%u", (cidx - 1), sets[0].root.link[XTNT_NODE_TAIL]->key);
         } else {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == NULL,
-                "Expected set head as NULL but got node%u", sets[0].link[XTNT_NODE_HEAD]->key);
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == NULL,
-                "Expected set tail as NULL but got node%u", sets[0].link[XTNT_NODE_TAIL]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == NULL,
+                "Expected set head as NULL but got node%u", sets[0].root.link[XTNT_NODE_HEAD]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == NULL,
+                "Expected set tail as NULL but got node%u", sets[0].root.link[XTNT_NODE_TAIL]->key);
         }
     }
 }
@@ -169,9 +169,9 @@ START_TEST (test_xtnt_list_delete_node7)
         "Expected node7 with key 7, but got node.key=%u", deleted->key);
     ck_assert_msg(sets[0].count == 15,
         "Expected set.count of 15, but got set.count=%u", sets[0].count);
-    ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &nodes[0],
+    ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &nodes[0],
         "Expected set head as node0 but was not node0");
-    ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
+    ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
         "Expected set tail as node15 but was not node15");
 }
 END_TEST
@@ -187,9 +187,9 @@ START_TEST (test_xtnt_list_delete_node8)
         "Expected node8 with key 8, but got node.key=%u", deleted->key);
     ck_assert_msg(sets[0].count == 15,
         "Expected set.count of 15, but got set.count=%u", sets[0].count);
-    ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &nodes[0],
+    ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &nodes[0],
         "Expected set head as node0 but was not node0");
-    ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
+    ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
         "Expected set tail as node15 but was not node15");
 }
 END_TEST
@@ -202,10 +202,10 @@ START_TEST (test_xtnt_list_insert_full)
             "Expected xtnt_list_insert to succeed, but returned %d", res);
         ck_assert_msg(sets[0].count == (idx + 17),
             "Expected set.count of %u, but got set.count=%u", (idx + 17), sets[0].count);
-        ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &in_nodes[idx],
-            "Expected set head as node%u but got node%u", idx, sets[0].link[XTNT_NODE_HEAD]->key);
-        ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
-            "Expected set tail as node15 but got node%u", (sets[0].link[XTNT_NODE_TAIL]->key));
+        ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &in_nodes[idx],
+            "Expected set head as node%u but got node%u", idx, sets[0].root.link[XTNT_NODE_HEAD]->key);
+        ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
+            "Expected set tail as node15 but got node%u", (sets[0].root.link[XTNT_NODE_TAIL]->key));
     }
 }
 END_TEST
@@ -218,10 +218,10 @@ START_TEST (test_xtnt_list_insert_nodes)
             "Expected xtnt_list_insert to succeed, but returned %d", res);
         ck_assert_msg(sets[1].count == (idx + 1),
             "Expected set.count of %u, but got set.count=%u", (idx + 1), sets[1].count);
-        ck_assert_msg(sets[1].link[XTNT_NODE_HEAD] == &in_nodes[idx],
-            "Expected set head as node%u but got node%u", idx, (sets[1].link[XTNT_NODE_HEAD]->key - 16));
-        ck_assert_msg(sets[1].link[XTNT_NODE_TAIL] == &in_nodes[0],
-            "Expected set tail as node0 but got node%u", (sets[1].link[XTNT_NODE_TAIL]->key - 16));
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_HEAD] == &in_nodes[idx],
+            "Expected set head as node%u but got node%u", idx, (sets[1].root.link[XTNT_NODE_HEAD]->key - 16));
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_TAIL] == &in_nodes[0],
+            "Expected set tail as node0 but got node%u", (sets[1].root.link[XTNT_NODE_TAIL]->key - 16));
     }
 }
 END_TEST
@@ -237,10 +237,10 @@ START_TEST (test_xtnt_list_replace_empty)
             "Expected replaced to be NULL, but got node%u", replaced->key);
         ck_assert_msg(sets[1].count == 0,
             "Expected set.count as 0, but got %u", sets[1].count);
-        ck_assert_msg(sets[1].link[XTNT_NODE_HEAD] == NULL,
-            "Expected set head as NULL but got node%u", sets[1].link[XTNT_NODE_HEAD]->key);
-        ck_assert_msg(sets[1].link[XTNT_NODE_TAIL] == NULL,
-            "Expected set tail as NULL but got node%u", sets[1].link[XTNT_NODE_TAIL]->key);
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_HEAD] == NULL,
+            "Expected set head as NULL but got node%u", sets[1].root.link[XTNT_NODE_HEAD]->key);
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_TAIL] == NULL,
+            "Expected set tail as NULL but got node%u", sets[1].root.link[XTNT_NODE_TAIL]->key);
     }
 }
 END_TEST
@@ -257,15 +257,15 @@ START_TEST (test_xtnt_list_replace_nodes)
         ck_assert_msg(sets[0].count == 16,
             "Expected set.count as 16, but got %u", sets[0].count);
         if (idx < 15) {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &in_nodes[0],
-                "Expected set head as node%u but got node%u", &in_nodes[idx].key, sets[0].link[XTNT_NODE_HEAD]->key);
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
-                "Expected set tail as node15 but got node%u", sets[0].link[XTNT_NODE_TAIL]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &in_nodes[0],
+                "Expected set head as node%u but got node%u", &in_nodes[idx].key, sets[0].root.link[XTNT_NODE_HEAD]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
+                "Expected set tail as node15 but got node%u", sets[0].root.link[XTNT_NODE_TAIL]->key);
         } else {
-            ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &in_nodes[0],
-                "Expected set head as node%u but got node%u", &in_nodes[idx].key, sets[0].link[XTNT_NODE_HEAD]->key);
-            ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &in_nodes[15],
-                "Expected set tail as node%u but got node%u", &in_nodes[idx].key, sets[0].link[XTNT_NODE_TAIL]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &in_nodes[0],
+                "Expected set head as node%u but got node%u", &in_nodes[idx].key, sets[0].root.link[XTNT_NODE_HEAD]->key);
+            ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &in_nodes[15],
+                "Expected set tail as node%u but got node%u", &in_nodes[idx].key, sets[0].root.link[XTNT_NODE_TAIL]->key);
         }
     }
 }
@@ -282,10 +282,10 @@ START_TEST (test_xtnt_list_get_empty)
             "Expected found to be NULL, but got node%u", found->key);
         ck_assert_msg(sets[1].count == 0,
             "Expected set.count as 0, but got %u", sets[1].count);
-        ck_assert_msg(sets[1].link[XTNT_NODE_HEAD] == NULL,
-            "Expected set head as NULL but got node%u", sets[1].link[XTNT_NODE_HEAD]->key);
-        ck_assert_msg(sets[1].link[XTNT_NODE_TAIL] == NULL,
-            "Expected set tail as NULL but got node%u", sets[1].link[XTNT_NODE_TAIL]->key);
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_HEAD] == NULL,
+            "Expected set head as NULL but got node%u", sets[1].root.link[XTNT_NODE_HEAD]->key);
+        ck_assert_msg(sets[1].root.link[XTNT_NODE_TAIL] == NULL,
+            "Expected set tail as NULL but got node%u", sets[1].root.link[XTNT_NODE_TAIL]->key);
     }
 }
 END_TEST
@@ -301,10 +301,10 @@ START_TEST (test_xtnt_list_get_nodes)
             "Expected found to be node%u, but got node%u", idx, found->key);
         ck_assert_msg(sets[0].count == 16,
             "Expected set.count as 16, but got %u", sets[0].count);
-        ck_assert_msg(sets[0].link[XTNT_NODE_HEAD] == &nodes[0],
-            "Expected set head as node0 but got node%u", sets[0].link[XTNT_NODE_HEAD]->key);
-        ck_assert_msg(sets[0].link[XTNT_NODE_TAIL] == &nodes[15],
-            "Expected set tail as node15 but got node%u", sets[0].link[XTNT_NODE_TAIL]->key);
+        ck_assert_msg(sets[0].root.link[XTNT_NODE_HEAD] == &nodes[0],
+            "Expected set head as node0 but got node%u", sets[0].root.link[XTNT_NODE_HEAD]->key);
+        ck_assert_msg(sets[0].root.link[XTNT_NODE_TAIL] == &nodes[15],
+            "Expected set tail as node15 but got node%u", sets[0].root.link[XTNT_NODE_TAIL]->key);
     }
 }
 END_TEST
