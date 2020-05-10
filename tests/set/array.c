@@ -41,11 +41,6 @@ void setup(void)
         nodes[idx].link[2] = (idx == 7)? &nodes[idx + 1]: NULL;
         nodes[idx].key = idx;
         nodes[idx].quirk = XTNT_ESUCCESS;
-        if (pthread_mutex_init(&(nodes[idx].lock), NULL)) {
-            XTNT_LOCK_SET_INIT_FAIL(nodes[idx].state);
-        } else {
-            XTNT_LOCK_SET_VALUE(nodes[idx].state, XTNT_LOCK_STATE_SUCCESS);
-        }
     }
 }
 
@@ -64,18 +59,18 @@ START_TEST (test_xtnt_array_create)
         ck_assert_msg(array->count == 8,
             "Expected array size of 8, but got %d", array->count);
 
-        ck_assert_msg(array->link[XTNT_NODE_HEAD] != NULL,
+        ck_assert_msg(array->root.link[XTNT_NODE_HEAD] != NULL,
             "Expected link head with valid memory pointer, but got NULL");
 
-        ck_assert_msg(array->link[XTNT_NODE_TAIL] != NULL,
+        ck_assert_msg(array->root.link[XTNT_NODE_TAIL] != NULL,
             "Expected link tail with valid memory pointer, but got NULL");
 
-        ck_assert_msg(array->link[XTNT_NODE_TAIL] == &(array->link[XTNT_NODE_HEAD][7]),
+        ck_assert_msg(array->root.link[XTNT_NODE_TAIL] == &(array->root.link[XTNT_NODE_HEAD][7]),
             "Expected link tail set to final node in array of size 8");
     } else {
         ck_assert_msg(status == XTNT_EFAILURE,
             "Memory allocation failed. Test not completed");
-        ck_assert_msg(XTNT_LOCK(array->state),
+        ck_assert_msg(XTNT_LOCK(array->root.state),
             "Node set mutex lock failure. Mutex operation returned %d", status);
     }
 }
@@ -97,7 +92,7 @@ START_TEST (test_xtnt_array_destroy)
     } else {
         ck_assert_msg(status == XTNT_EFAILURE,
             "Memory allocation failed. Test not completed");
-        ck_assert_msg(XTNT_LOCK(array->state),
+        ck_assert_msg(XTNT_LOCK(array->root.state),
             "Node set mutex lock failure. Mutex operation returned %d", status);
     }
 }
