@@ -6,8 +6,9 @@ libextant_la_SOURCES = extant.c \
 					   common.c \
 					   log/log.c \
 					   set/array.c \
-					   set/list.c \
 					   set/common.c \
+					   set/list.c \
+					   set/node.c
 					   set/queue.c \
 					   set/stack.c
 
