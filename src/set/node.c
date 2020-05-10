@@ -52,9 +52,9 @@ xtnt_node_initialize(
     node->link[1] = NULL;
     node->link[2] = NULL;
     node->quirk = quirk;
-    res = node->state = XTNT_ESUCCESS;
+    node->state = XTNT_ESUCCESS;
     *ptr = value;
-    return res;
+    return XTNT_ESUCCESS;
 }
 
 /**
@@ -70,6 +70,6 @@ xtnt_node_uninitialize(
     *ptr = NULL;
     node->key = node->quirk = 0;
     node->link[0] = node->link[1] = node->link[2] = NULL;
-    xtnt_status_t res = node->state = XTNT_EFAILURE;
-    return res;
+    node->state = XTNT_EFAILURE;
+    return XTNT_ESUCCESS;
 }
