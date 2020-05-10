@@ -188,7 +188,7 @@ xtnt_set_state(
     struct xtnt_node_set *set,
     xtnt_uint_t **state)
 {
-    return set->root.state(set, state);
+    return set->fn->state(set, state);
 }
 
 extern inline xtnt_status_t
@@ -214,7 +214,7 @@ xtnt_set_push(
     struct xtnt_node_set *set,
     struct xtnt_node *node)
 {
-    set->fn->push(set, node);
+    return set->fn->push(set, node);
 }
 
 extern inline xtnt_status_t
