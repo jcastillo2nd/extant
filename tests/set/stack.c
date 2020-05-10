@@ -56,9 +56,9 @@ void setup(void)
     node3q1.link[XTNT_NODE_MIDDLE] = NULL;
     node3q1.link[XTNT_NODE_TAIL] = &node2q1;
 
-    stack1.link[XTNT_NODE_HEAD] = &node3q1;
-    stack1.link[XTNT_NODE_MIDDLE] = NULL;
-    stack1.link[XTNT_NODE_TAIL] = &node1q1;
+    stack1.root.link[XTNT_NODE_HEAD] = &node3q1;
+    stack1.root.link[XTNT_NODE_MIDDLE] = NULL;
+    stack1.root.link[XTNT_NODE_TAIL] = &node1q1;
     stack1.count = 3;
 
     node1q2.key = 4;
@@ -73,9 +73,9 @@ void setup(void)
     node3q2.value = &value3;
     node3q2.link[0] = node3q2.link[1] = node3q2.link[2] = NULL;
 
-    stack2.link[XTNT_NODE_HEAD] = NULL;
-    stack2.link[XTNT_NODE_MIDDLE] = NULL;
-    stack2.link[XTNT_NODE_TAIL] = NULL;
+    stack2.root.link[XTNT_NODE_HEAD] = NULL;
+    stack2.root.link[XTNT_NODE_MIDDLE] = NULL;
+    stack2.root.link[XTNT_NODE_TAIL] = NULL;
     stack2.count = 0;
 }
 
@@ -130,7 +130,7 @@ END_TEST
 START_TEST (test_xtnt_stack_push)
 {
     xtnt_status_t res = xtnt_stack_push(&stack1, &node1q2);
-    struct xtnt_node *head = stack1.link[XTNT_NODE_HEAD];
+    struct xtnt_node *head = stack1.root.link[XTNT_NODE_HEAD];
     ck_assert_msg(res == XTNT_ESUCCESS,
         "Expected xtnt_stack_push to succeed");
     ck_assert_msg(head->key == (&node1q2)->key,
@@ -141,7 +141,7 @@ END_TEST
 START_TEST (test_xtnt_empty_stack_push)
 {
     xtnt_status_t res = xtnt_stack_push(&stack2, &node1q2);
-    struct xtnt_node *tail = stack2.link[XTNT_NODE_TAIL];
+    struct xtnt_node *tail = stack2.root.link[XTNT_NODE_TAIL];
     ck_assert_msg(res == XTNT_ESUCCESS,
         "Expected xtnt_stack_push to succeed");
     ck_assert_msg(tail->key == (&node1q2)->key,
