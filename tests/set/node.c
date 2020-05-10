@@ -28,13 +28,14 @@ SOFTWARE.
 */
 
 #include <check.h>
-#include <extant/set/common.h>
+#include <extant/set/node.h>
 
 #include <stdio.h>
 
-struct xtnt_node_set set1;
-struct xtnt_node_set set2;
-xtnt_uint_t value;
+struct xtnt_node node1;
+struct xtnt_node node2;
+xtnt_uint_t value1 = 1;
+xtnt_uint_t value2 = 2;
 
 void setup(void)
 {
@@ -44,31 +45,33 @@ void teardown(void)
 {
 }
 
-START_TEST (test_xtnt_set_initialize)
+START_TEST (test_xtnt_node_initialize)
 {
-    struct xtnt_node_set *set = &set1;
-    xtnt_int_t test = xtnt_node_set_initialize(set);
-    ck_assert_msg(test == 0,
+    struct xtnt_node *res = &node1;
+    xtnt_status_t test = XTNT_EFAILURE;
+    test = xtnt_node_initialize(res, 5, 34, &value1);
+    ck_assert_msg(test == XTNT_ESUCCESS,
         "Initialization failed with %d", test);
-    ck_assert_msg(set->root.link[XTNT_NODE_HEAD] == NULL,
-        "Expected set head as NULL, but was not NULL");
-    ck_assert_msg(set->root.link[XTNT_NODE_MIDDLE] == NULL,
-        "Expected set middle as NULL, but was not NULL");
-    ck_assert_msg(set->root.link[XTNT_NODE_TAIL] == NULL,
-        "Expected set tail as NULL, but was not NULL");
-    ck_assert_msg(set->count == 0,
-        "Expected set count as 0, but got %u", set->count);
-    ck_assert_msg(set->root.state == 0,
-        "Expected set state as 0, but got %u", set->root.state);
+    ck_assert_msg(res->key == 5,
+        "Expected node of key 5 but got %u", res->key);
+    ck_assert_msg(res->value == &value1,
+        "Expected node value of 1, but got %u", (xtnt_uint_t *) res->value);
+    ck_assert_msg(res->quirk == 34,
+        "Expected quirk value of %d, but got %d", 34, res->quirk);
+    ck_assert_msg(res->link[XTNT_NODE_HEAD] == NULL,
+        "Expected node head as NULL, but was not NULL");
+    ck_assert_msg(res->link[XTNT_NODE_MIDDLE] == NULL,
+        "Expected node middle as NULL, but was not NULL");
+    ck_assert_msg(res->link[XTNT_NODE_TAIL] == NULL,
+        "Expected node tail as NULL, but was not NULL");
 }
-END_TEST
 
-START_TEST (test_xtnt_set_uninitialize)
+START_TEST (test_xtnt_node_uninitialize)
 {
-    struct xtnt_node_set *set = &set2;
-    xtnt_status_t res = xtnt_node_set_uninitialize(set);
+    struct xtnt_node *node = &node2;
+    xtnt_status_t res = xtnt_node_uninitialize(node);
     ck_assert_msg(res == XTNT_ESUCCESS,
-        "Expected xtnt_node_set_uninitialize to succeed");
+        "Uninitialization failed with %d", res);
 }
 END_TEST
 
@@ -82,8 +85,8 @@ Suite * xtnt_set_common_suite(void)
     tc_set_common = tcase_create("Set Common");
 
     tcase_add_checked_fixture(tc_set_common, setup, teardown);
-    tcase_add_test(tc_set_common, test_xtnt_set_initialize);
-    tcase_add_test(tc_set_common, test_xtnt_set_uninitialize);
+    tcase_add_test(tc_set_common, test_xtnt_node_initialize);
+    tcase_add_test(tc_set_common, test_xtnt_node_uninitialize);
     suite_add_tcase(s, tc_set_common);
 
     return s;
