@@ -75,19 +75,19 @@ START_TEST (test_xtnt_node_uninitialize)
 }
 END_TEST
 
-Suite * xtnt_set_common_suite(void)
+Suite * xtnt_set_node_suite(void)
 {
     Suite *s;
-    TCase *tc_set_common;
+    TCase *tc_set_node;
 
-    s = suite_create("xtnt_set");
+    s = suite_create("xtnt_node");
 
-    tc_set_common = tcase_create("Set Common");
+    tc_set_node = tcase_create("Set Node");
 
-    tcase_add_checked_fixture(tc_set_common, setup, teardown);
-    tcase_add_test(tc_set_common, test_xtnt_node_initialize);
-    tcase_add_test(tc_set_common, test_xtnt_node_uninitialize);
-    suite_add_tcase(s, tc_set_common);
+    tcase_add_checked_fixture(tc_set_node, setup, teardown);
+    tcase_add_test(tc_set_node, test_xtnt_node_initialize);
+    tcase_add_test(tc_set_node, test_xtnt_node_uninitialize);
+    suite_add_tcase(s, tc_set_node);
 
     return s;
 }
@@ -98,7 +98,7 @@ int main(void)
     Suite *s;
     SRunner *sr;
 
-    s = xtnt_set_common_suite();
+    s = xtnt_set_node_suite();
     sr = srunner_create(s);
 
     srunner_run_all(sr, CK_VERBOSE);

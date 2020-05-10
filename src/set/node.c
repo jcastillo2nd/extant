@@ -45,8 +45,7 @@ xtnt_node_initialize(
     xtnt_uint_t quirk,
     void *value)
 {
-    xtnt_status_t res = XTNT_EFAILURE;
-    void **ptr = node->value; // Intentionally discard const;
+    void **ptr = &node->value; // Intentionally discard const;
     node->key = key;
     node->link[0] = NULL;
     node->link[1] = NULL;
@@ -66,10 +65,10 @@ xtnt_status_t
 xtnt_node_uninitialize(
     struct xtnt_node *node)
 {
-    void **ptr = node->value;
-    *ptr = NULL;
+    void **ptr = &node->value;
     node->key = node->quirk = 0;
     node->link[0] = node->link[1] = node->link[2] = NULL;
     node->state = XTNT_EFAILURE;
+    *ptr = NULL;
     return XTNT_ESUCCESS;
 }
