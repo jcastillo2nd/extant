@@ -65,7 +65,7 @@ xtnt_status_t
 xtnt_node_uninitialize(
     struct xtnt_node *node)
 {
-    void **ptr = &node->value;
+    void **ptr = &node->value; // Intentionally discard const;
     node->key = node->quirk = 0;
     node->link[0] = node->link[1] = node->link[2] = NULL;
     node->state = XTNT_EFAILURE;
